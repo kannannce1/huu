@@ -11,17 +11,24 @@ s1 = """
 <html>
 <head>
 <style type="text/css">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 table {
 	  font-family: arial, sans-serif;
 	    border-collapse: collapse;
 		  width: 100%;
 }
 
-td, th {
+th {
+	  border: 1px solid #dddddd;
+			    text-align: center;
+				  padding: 8px;
+}
+td {
 	  border: 1px solid #dddddd;
 			    text-align: left;
 				  padding: 8px;
 }
+
 </style>
 </head>
 <body>
@@ -30,9 +37,10 @@ td, th {
 {% set ns = namespace() %}
 {% set ns.totalReleases = 0 %}
 {% set ns.platPerRelease = 0 %}
+{% set ns.total_cols = 0 %}
 
 <table>
-
+<thead>
 <tr>
 <th>X</th>
 <th>X</th>
@@ -43,32 +51,40 @@ td, th {
 {% for keys2 in header[keys1[0]]|dictsort %}
 			{% set ns.platPerRelease = ns.platPerRelease +1  %}
 		{% endfor %}
-	<th colspan="{{ ns.platPerRelease }}"> {{ keys1[0] }} </th>
+	<th align="center" colspan="{{ ns.platPerRelease }}"> {{ keys1[0] }} </th>
 {% endfor %}
 </tr>
 
 <tr>
-<th>Component</th>
-<th>Description</th>
-<th>Firmware</th>
+<th bgcolor="grey">Component</th>
+<th bgcolor="grey">Description</th>
+<th bgcolor="grey">Firmware</th>
 {% for keys1 in header|dictsort(reverse=true) %}
 	{% set ns.totalReleases = ns.totalReleases + 1 %}
 		{% set ns.platPerRelease = 0 %}
-{% for keys2 in header[keys1[0]]|dictsort %}
+		{% for keys2 in header[keys1[0]]|dictsort %}
 			{% set ns.platPerRelease = ns.platPerRelease +1  %}
-		<th>{{ keys2[0] }}</th>
+			{% set ns.total_cols = ns.total_cols +1  %}
+		<th align="center" >{{ keys2[0] }}</th>
 		{% endfor %}
 {% endfor %}
 </tr>
+</thead>
 
-{% for row in rData %}
+<tbody>
+{% for component in rData|dictsort %}
 <tr>
-	{% for element in row %}
-			<td> {{ element }} </td>
+	<th bgcolor="#17cad" colspan="{{ 3 + ns.total_cols }}"> {{ component[0] }} </th>
+</tr>
+	{% for rowElem in component[1] %}
+<tr>
+		{% for cell in rowElem %}
+	  		 <td > {{ cell }} </td>
+		{% endfor  %}
+</tr>
 	{% endfor %}
-</tr>
 {% endfor %}
-
+</tbody>
 </table>
 </body>
 </html>
@@ -260,7 +276,7 @@ def generateComparisonReport(fileList):
 							'''
 							indexInHtmlReport = 0
 							rowInHtmlPresent =  False
-							for rowHtml in htmlReport:
+							for rowHtml in componentHTMLReport:
 								tempList = [ rowHtml[0], rowHtml[1], rowHtml[2] ]
 								if tempList == row:
 									rowInHtmlPresent = True
@@ -268,20 +284,21 @@ def generateComparisonReport(fileList):
 								indexInHtmlReport += 1
 							
 							if rowInHtmlPresent:
-								print('ROW PRESENT', ii, htmlReport[indexInHtmlReport])
-								htmlReport[indexInHtmlReport][ii + 3] = '&#10003'
+								print('ROW PRESENT', ii, componentHTMLReport[indexInHtmlReport])
+								componentHTMLReport[indexInHtmlReport][ii + 3] = '&#10003'
 							else:
 								print('ROW ABSENT')
 								print('ROW INSERTED BEFORE', ii, htmlRow)
 								htmlRow[ii + 3] = '&#10003'
 								print('ROW INSERTED AFTER', ii, htmlRow )
-								htmlReport.append(htmlRow)
+								componentHTMLReport.append(htmlRow)
+		newHTML[component] = componentHTMLReport
 
-	print(htmlReport)
+	print(newHTML)
 	
 	with open("report.html",'w') as w:
 		t = Template(s1)
-		w.write(t.render(rData=htmlReport, header=finalData))
+		w.write(t.render(rData=newHTML, header=finalData))
 
 def main():
 	generateComparisonReport(sys.argv[1:])
