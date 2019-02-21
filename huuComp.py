@@ -12,7 +12,7 @@ s1 = """
 <head>
 <style type="text/css">
 
-.table-fixed {
+table {
 	border-collapse: collapse;
 	background-color: #f3f3f3;
 }
@@ -48,34 +48,33 @@ th {
 <h1>UCS C-Series Rack-Mount Standalone Server Software Comparison</h1>
 
 {% set ns = namespace() %}
-{% set ns.totalReleases = 0 %}
-{% set ns.platPerRelease = 0 %}
 {% set ns.total_cols = 0 %}
 {% set ns.i = 0 %}
 
-<div >
 <table>
 <thead>
 
-</thead>
-<tbody>
-
-<!--
 {% for component in rData|dictsort %}
 	{% if component[1] == "Headers" %}
 		{% for rowElem in component[1] %}
+		{% set ns.total_cols = 0 %}
 <tr>
 			{% for cell in rowElem %}
-	  		 	<td > {{ cell }} </td>
+	  		 	<th > {{ cell }} </th>
+				{% set ns.total_cols = ns.total_cols + 1  %}
 			{% endfor  %}
 </tr>
+		{% endfor %}
 	{% endif %}
 {% endfor %}
+</thead>
+<tbody>
+
 
 {% for component in rData|dictsort %}
 	{% if component[1] != "Headers" %}
 <tr>
-	<th style="font-size:160%;" bgcolor="#009edc" colspan="{{ 3 + ns.total_cols }}"> {{ component[0] }} </th>
+	<th style="font-size:160%;" bgcolor="#009edc" colspan="{{ ns.total_cols }}"> {{ component[0] }} </th>
 </tr>
 		{% for rowElem in component[1] %}
 	<tr>
@@ -92,10 +91,9 @@ th {
 		{% endfor %}
 	{% endif %}
 {% endfor %}
--->
+
 </tbody>
 </table>
-</div>
 <script src="./jquery-freeze-table-master/dist/js/freeze-table.js"></script>
 <script>
 $(".example").freezeTable({
@@ -314,7 +312,7 @@ def generateComparisonReport(fileList):
 #adding headers as part of table
 		componentHTMLReport = []
 
-		tableHeaders = [['Component','Description','Firmware Version'],['X','X','X']]
+		tableHeaders = [['X','X','X'], ['Component','Description','Firmware Version']]
 		index = len(tableHeaders[0])	
 		for i in range(len(tableHeaders)):
 
