@@ -6,6 +6,156 @@ import logging
 
 from jinja2 import Template
 
+
+class ReleaseNotesFSM:
+
+	def __init__(self):
+		self.handlers = {}
+		self.startState = None
+		self.endStates = []
+
+	def add_state(self, name, handler, end_state=0):
+		name = name.upper()
+		self.handlers[name] = handler
+		if end_state:
+			self.endStates.append(name)
+
+	def set_start(self, name):
+		self.startState = name.upper()
+
+	def run(self, cargo):
+		try:
+			handler = self.handlers[self.startState]
+		except:
+			raise InitializationError("must call .set_start() before .run()")
+		if not self.endStates:
+			raise  InitializationError("at least one state must be an end_state")
+
+		while True:
+			print('in run')
+			(newState, cargo) = handler(cargo)
+			if newState.upper() in self.endStates:
+				print("reached ", newState)
+				break 
+			else:
+				handler = self.handlers[newState.upper()]
+
+finalData = {}
+platform = ''
+release = ''
+myDict = {}
+myDict["Component"] = []
+
+def start_fsm(lines):
+	newState = "rel_and_platform"
+	return (newState, lines)
+
+def isReleaseAndPlatform(lines):
+
+	line = lines[0]
+	global platform
+	global release
+
+	z = re.search(r'ucs-(.*?)-huu-(.*?).iso', line)
+	if z:
+		platform = z.group(1)
+		release  = z.group(2)
+		
+		if release != "":
+			if release in finalData.keys():
+				if platform != "":
+					if platform in finalData[release].keys():
+						print('dropping & exiting since '+ i +' already processed\n')
+						sys.exit()
+					finalData[release][platform] = {}
+				else:
+					print("Error fetching 'platform'")
+					sys.exit()
+			else:
+				finalData[release] = {}
+				if platform != "" :
+					finalData[release][platform] = {}
+				else:
+					print("Error fetching 'platform'")
+					sys.exit()
+					
+		else:
+		   print("Error fetching 'release'")
+		   sys.exit()
+
+	if platform != "" and release != "":
+		newState = "component_start"
+	else:
+		newState = "rel_and_platform"
+
+	return (newState, lines[1:])
+
+def componentStart(lines):
+	componentName = ""
+
+	global myDict
+
+	z = re.search(r'^\s*(\b([A-Z-]+){1}\b)\s*$', lines[0])
+	if z:
+		componentName = z.group(1)
+		myDict["Component"].append(componentName)
+		myDict[componentName] = []
+		myDict[componentName].append(lineNo)
+
+	if componentName != "":
+		newState = "component_rows"
+	else:
+		newState = "component_start"
+
+	print(componentName)
+	return (newState, lines[1:])
+
+def componentRows(lines):
+	return ('missing_hdd_end', lines[1:] )
+
+def componentsEnd(r):
+	pass
+
+def hddStart(r):
+	pass
+
+def hddRows(r):
+	pass
+
+def hddEnd(r):
+	pass
+
+def end_fsm(r):
+	pass
+
+
+def parseReleaseNotes(fileList):
+
+	m = ReleaseNotesFSM()
+
+	m.add_state("Start", start_fsm)
+	m.add_state("rel_and_platform", isReleaseAndPlatform)
+	m.add_state("component_start", componentStart)
+	m.add_state("component_rows", componentRows)
+	m.add_state("components_end", componentsEnd)
+	m.add_state("hdd_start", hddStart)
+	m.add_state("hdd_rows", hddRows)
+	m.add_state("hdd_end", hddEnd)
+	m.add_state("End", end_fsm)
+	m.add_state("missing_rel_and_platform", None, end_state=1)	
+	m.add_state("missing_component", None, end_state=1)	
+	m.add_state("missing_component_end", None, end_state=1)	
+	m.add_state("missing_hdd", None, end_state=1)	
+	m.add_state("missing_hdd_end", None, end_state=1)	
+
+	for i in fileList:
+		m.set_start("Start")
+		with open(i, 'r') as f:
+			lines = f.readlines()
+			lines =list(map(str.strip, lines))
+			lines = list(filter(lambda a: a != '', lines))
+			m.run(lines)
+ 
 def generateComparisonReport(fileList):
 	#open all the files
 	finalData   = {}
@@ -255,7 +405,8 @@ def generateComparisonReport(fileList):
 			w.write(t.render(rData=dataToRender, header=finalData))
 
 def main():
-	generateComparisonReport(sys.argv[1:])
+	#generateComparisonReport(sys.argv[1:])
+	parseReleaseNotes(sys.argv[1:])
 
 if __name__ == '__main__':
   main()
