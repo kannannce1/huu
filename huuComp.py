@@ -48,20 +48,20 @@ th {
 <h1>UCS C-Series Rack-Mount Standalone Server Software Comparison</h1>
 
 {% set ns = namespace() %}
-{% set ns.total_cols = 0 %}
+{% set ns.total_plat = 0 %}
 {% set ns.i = 0 %}
 
 <table>
 <thead>
 
 {% for component in rData|dictsort %}
-	{% if component[1] == "Headers" %}
+	{% if component[0] == "Headers" %}
 		{% for rowElem in component[1] %}
-		{% set ns.total_cols = 0 %}
+		{% set ns.total_plat = 0 %}
 <tr>
 			{% for cell in rowElem %}
 	  		 	<th > {{ cell }} </th>
-				{% set ns.total_cols = ns.total_cols + 1  %}
+				{% set ns.total_plat = ns.total_plat + 1  %}
 			{% endfor  %}
 </tr>
 		{% endfor %}
@@ -72,9 +72,9 @@ th {
 
 
 {% for component in rData|dictsort %}
-	{% if component[1] != "Headers" %}
+	{% if component[0] != "Headers" %}
 <tr>
-	<th style="font-size:160%;" bgcolor="#009edc" colspan="{{ ns.total_cols }}"> {{ component[0] }} </th>
+	<th style="font-size:160%;" bgcolor="#009edc" colspan={{ ns.total_plat }}> {{ component[0] }} </th>
 </tr>
 		{% for rowElem in component[1] %}
 	<tr>
