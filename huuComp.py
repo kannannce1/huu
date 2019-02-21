@@ -6,103 +6,6 @@ import logging
 
 from jinja2 import Template
 
-s1 = """
-<!DOCTYPE html>
-<html>
-<head>
-<style type="text/css">
-
-table {
-	border-collapse: collapse;
-	background-color: #f3f3f3;
-}
-td {
-	border: 1px solid black;
-	text-align: left;
-	padding: 15px;
-}
-
-th {
-	border: 1px solid black;
-	text-align: left;
-	padding: 15px;
-	bgcolor="#004BAF";
-	color=white;
-}
-
-#marker {
-	text-align:center;
-	color:blue;
-}
-
-</style>
-<script src="https://code.jquery.com/jquery-1.12.4.min.js" 
-        integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" 
-		crossorigin="anonymous">
-</script>
-
-
-</head>
-
-<body>
-<h1>UCS C-Series Rack-Mount Standalone Server Software Comparison</h1>
-
-{% set ns = namespace() %}
-{% set ns.total_plat = 0 %}
-{% set ns.i = 0 %}
-
-<table>
-<thead>
-
-{% for component in rData|dictsort %}
-	{% if component[0] == "Headers" %}
-		{% for rowElem in component[1] %}
-		{% set ns.total_plat = 0 %}
-<tr>
-			{% for cell in rowElem %}
-	  		 	<th > {{ cell }} </th>
-				{% set ns.total_plat = ns.total_plat + 1  %}
-			{% endfor  %}
-</tr>
-		{% endfor %}
-	{% endif %}
-{% endfor %}
-</thead>
-<tbody>
-
-
-{% for component in rData|dictsort %}
-	{% if component[0] != "Headers" %}
-<tr>
-	<th style="font-size:160%;" bgcolor="#009edc" colspan={{ ns.total_plat }}> {{ component[0] }} </th>
-</tr>
-		{% for rowElem in component[1] %}
-	<tr>
-				{% set ns.i = 0 %}
-			{% for cell in rowElem %}
-				{% if ns.i < 3 %}
-				 <td > {{ cell }} </td>
-				{% else  %}
-				 <td id="marker"> {{ cell }} </td>
-				{% endif %}
-				{% set ns.i = ns.i +1  %}
-			{% endfor  %}
-	</tr>
-		{% endfor %}
-	{% endif %}
-{% endfor %}
-
-</tbody>
-</table>
-<script src="./jquery-freeze-table-master/dist/js/freeze-table.js"></script>
-<script>
-$(".example").freezeTable({
-		'columnNum': 3
-		});
-</script>
-</body>
-</html>
-"""
 def generateComparisonReport(fileList):
 	#open all the files
 	finalData   = {}
@@ -309,34 +212,47 @@ def generateComparisonReport(fileList):
 
 		newHTML[component] = componentHTMLReport
 
-#adding headers as part of table
-		componentHTMLReport = []
+#generating a table with all rows; starting with headers
+#no key,value
 
-		tableHeaders = [['X','X','X'], ['Component','Description','Firmware Version']]
-		index = len(tableHeaders[0])	
-		for i in range(len(tableHeaders)):
+	dataToRender = []
 
-			index = len(tableHeaders[i])	
-			htmlRow = ['&#10006'] * totalColumns
-			htmlRow = tableHeaders[i]
-			for release in reversed(sorted(finalData.keys())):
-				for platform in sorted(finalData[release].keys()):
-					if i == 0:
-						htmlRow.insert(index, release)
-					else:
-						htmlRow.insert(index, platform)
-					index += 1
-			
-			componentHTMLReport.append(htmlRow)
+	#adding headers
+	tableHeaders = [['X','X','X'], ['Component','Description','Firmware Version']]
+	index = len(tableHeaders[0])	
+	for i in range(len(tableHeaders)):
 
-		newHTML["Headers"] = componentHTMLReport
+		index = len(tableHeaders[i])	
+		htmlRow = ['&#10006'] * totalColumns
+		htmlRow = tableHeaders[i]
+		for release in reversed(sorted(finalData.keys())):
+			for platform in sorted(finalData[release].keys()):
+				if i == 0:
+					htmlRow.insert(index, release)
+				else:
+					htmlRow.insert(index, platform)
+				index += 1
+		
+		dataToRender.append(htmlRow)
 
-#adding header as part of table
-	print(newHTML)
+	#adding all rows for each component
+	for component in sorted(newHTML.keys()):
+		htmlRow = ['&#10006'] * totalColumns
+		htmlRow[0] = component
+		dataToRender.append(htmlRow)
+		for row in newHTML[component]:
+			dataToRender.append(row)
+		
+
+#generating a table with all rows
+#	print(newHTML)
+	print(dataToRender)
 	
 	with open("report.html",'w') as w:
-		t = Template(s1)
-		w.write(t.render(rData=newHTML, header=finalData))
+		with open("template.html", 'r') as T:
+			temp = T.read()
+			t = Template(temp)
+			w.write(t.render(rData=dataToRender, header=finalData))
 
 def main():
 	generateComparisonReport(sys.argv[1:])
