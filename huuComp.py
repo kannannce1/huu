@@ -11,81 +11,110 @@ s1 = """
 <html>
 <head>
 <style type="text/css">
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-table {
-	  font-family: arial, sans-serif;
-	    border-collapse: collapse;
-		  width: 100%;
+
+.table-fixed {
+
+	background-color: #f3f3f3;
+
+}
+.table-fixed {
+	  border-collapse: collapse;
+}
+td {
+	border: 1px solid black;
+	text-align: left;
+	padding: 15px;
 }
 
 th {
-	  border: 1px solid #dddddd;
-			    text-align: center;
-				  padding: 8px;
+	border: 1px solid black;
+	text-align: left;
+	padding: 15px;
+	bgcolor="#004BAF";
+	color=white;
 }
-td {
-	  border: 1px solid #dddddd;
-			    text-align: left;
-				  padding: 8px;
+
+#marker {
+	text-align:center;
+	color:blue;
 }
 
 </style>
-</head>
-<body>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" 
+        integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" 
+		crossorigin="anonymous">
+</script>
 
+
+</head>
+
+<body>
 <h1>UCS C-Series Rack-Mount Standalone Server Software Comparison</h1>
+
 {% set ns = namespace() %}
 {% set ns.totalReleases = 0 %}
 {% set ns.platPerRelease = 0 %}
 {% set ns.total_cols = 0 %}
+{% set ns.i = 0 %}
 
-<table>
+<div class="example">
+<table class="table table-fixed">
 <thead>
 <tr>
-<th>X</th>
-<th>X</th>
-<th>X</th>
+<th colspan="3"></th>
 {% for keys1 in header|dictsort(reverse=true) %}
 	{% set ns.totalReleases = ns.totalReleases + 1 %}
 		{% set ns.platPerRelease = 0 %}
 {% for keys2 in header[keys1[0]]|dictsort %}
 			{% set ns.platPerRelease = ns.platPerRelease +1  %}
 		{% endfor %}
-	<th align="center" colspan="{{ ns.platPerRelease }}"> {{ keys1[0] }} </th>
+	<th colspan="{{ ns.platPerRelease }}"> {{ keys1[0] }} </th>
 {% endfor %}
 </tr>
 
 <tr>
-<th bgcolor="grey">Component</th>
-<th bgcolor="grey">Description</th>
-<th bgcolor="grey">Firmware</th>
+<th>Component</th>
+<th>Description</th>
+<th>Firmware</th>
 {% for keys1 in header|dictsort(reverse=true) %}
 	{% set ns.totalReleases = ns.totalReleases + 1 %}
 		{% set ns.platPerRelease = 0 %}
 		{% for keys2 in header[keys1[0]]|dictsort %}
 			{% set ns.platPerRelease = ns.platPerRelease +1  %}
 			{% set ns.total_cols = ns.total_cols +1  %}
-		<th align="center" >{{ keys2[0] }}</th>
+		<th>{{ keys2[0] }}</th>
 		{% endfor %}
 {% endfor %}
 </tr>
 </thead>
-
 <tbody>
 {% for component in rData|dictsort %}
 <tr>
-	<th bgcolor="#17cad" colspan="{{ 3 + ns.total_cols }}"> {{ component[0] }} </th>
+	<th style="font-size:160%;" bgcolor="#009edc" colspan="{{ 3 + ns.total_cols }}"> {{ component[0] }} </th>
 </tr>
 	{% for rowElem in component[1] %}
 <tr>
+			{% set ns.i = 0 %}
 		{% for cell in rowElem %}
+			{% if ns.i < 3 %}
 	  		 <td > {{ cell }} </td>
+			{% else  %}
+	  		 <td id="marker"> {{ cell }} </td>
+			{% endif %}
+			{% set ns.i = ns.i +1  %}
 		{% endfor  %}
 </tr>
 	{% endfor %}
 {% endfor %}
 </tbody>
 </table>
+</div>
+<script src="./jquery-freeze-table-master/dist/js/freeze-table.js"></script>
+<script>
+$(".example").freezeTable({
+		'columnNum': 3
+		});
+</script>
 </body>
 </html>
 """
