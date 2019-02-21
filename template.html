@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style type="text/css">
+
+
+</style>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+crossorigin="anonymous"></script>
+
+</head>
+
+<body>
+<h1>UCS C-Series Rack-Mount Standalone Server Software Comparison</h1>
+
+<table>
+<thead>
+
+</thead>
+
+<tbody>
+{% for row in rData  %}
+	<tr>
+		{% for cell in row  %}
+		<td>{{cell}}</td>
+		{% endfor %}
+	</tr>
+{% endfor  %}
+</tbody>
+
+</table>
+<script src="./jquery-freeze-table-master/dist/js/freeze-table.js"></script>
+<script>
+$(".example").freezeTable({
+		'columnNum': 3
+		});
+</script>
+</body>
+</html>
