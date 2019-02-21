@@ -13,12 +13,8 @@ s1 = """
 <style type="text/css">
 
 .table-fixed {
-
+	border-collapse: collapse;
 	background-color: #f3f3f3;
-
-}
-.table-fixed {
-	  border-collapse: collapse;
 }
 td {
 	border: 1px solid black;
@@ -57,55 +53,46 @@ th {
 {% set ns.total_cols = 0 %}
 {% set ns.i = 0 %}
 
-<div class="example">
-<table class="table table-fixed">
+<div >
+<table>
 <thead>
-<tr>
-<th colspan="3"></th>
-{% for keys1 in header|dictsort(reverse=true) %}
-	{% set ns.totalReleases = ns.totalReleases + 1 %}
-		{% set ns.platPerRelease = 0 %}
-{% for keys2 in header[keys1[0]]|dictsort %}
-			{% set ns.platPerRelease = ns.platPerRelease +1  %}
-		{% endfor %}
-	<th colspan="{{ ns.platPerRelease }}"> {{ keys1[0] }} </th>
-{% endfor %}
-</tr>
 
-<tr>
-<th>Component</th>
-<th>Description</th>
-<th>Firmware</th>
-{% for keys1 in header|dictsort(reverse=true) %}
-	{% set ns.totalReleases = ns.totalReleases + 1 %}
-		{% set ns.platPerRelease = 0 %}
-		{% for keys2 in header[keys1[0]]|dictsort %}
-			{% set ns.platPerRelease = ns.platPerRelease +1  %}
-			{% set ns.total_cols = ns.total_cols +1  %}
-		<th>{{ keys2[0] }}</th>
-		{% endfor %}
-{% endfor %}
-</tr>
 </thead>
 <tbody>
+
+<!--
 {% for component in rData|dictsort %}
+	{% if component[1] == "Headers" %}
+		{% for rowElem in component[1] %}
+<tr>
+			{% for cell in rowElem %}
+	  		 	<td > {{ cell }} </td>
+			{% endfor  %}
+</tr>
+	{% endif %}
+{% endfor %}
+
+{% for component in rData|dictsort %}
+	{% if component[1] != "Headers" %}
 <tr>
 	<th style="font-size:160%;" bgcolor="#009edc" colspan="{{ 3 + ns.total_cols }}"> {{ component[0] }} </th>
 </tr>
-	{% for rowElem in component[1] %}
-<tr>
-			{% set ns.i = 0 %}
-		{% for cell in rowElem %}
-			{% if ns.i < 3 %}
-	  		 <td > {{ cell }} </td>
-			{% else  %}
-	  		 <td id="marker"> {{ cell }} </td>
-			{% endif %}
-			{% set ns.i = ns.i +1  %}
-		{% endfor  %}
-</tr>
-	{% endfor %}
+		{% for rowElem in component[1] %}
+	<tr>
+				{% set ns.i = 0 %}
+			{% for cell in rowElem %}
+				{% if ns.i < 3 %}
+				 <td > {{ cell }} </td>
+				{% else  %}
+				 <td id="marker"> {{ cell }} </td>
+				{% endif %}
+				{% set ns.i = ns.i +1  %}
+			{% endfor  %}
+	</tr>
+		{% endfor %}
+	{% endif %}
 {% endfor %}
+-->
 </tbody>
 </table>
 </div>
@@ -321,8 +308,32 @@ def generateComparisonReport(fileList):
 								htmlRow[ii + 3] = '&#10003'
 								print('ROW INSERTED AFTER', ii, htmlRow )
 								componentHTMLReport.append(htmlRow)
+
 		newHTML[component] = componentHTMLReport
 
+#adding headers as part of table
+		componentHTMLReport = []
+
+		tableHeaders = [['Component','Description','Firmware Version'],['X','X','X']]
+		index = len(tableHeaders[0])	
+		for i in range(len(tableHeaders)):
+
+			index = len(tableHeaders[i])	
+			htmlRow = ['&#10006'] * totalColumns
+			htmlRow = tableHeaders[i]
+			for release in reversed(sorted(finalData.keys())):
+				for platform in sorted(finalData[release].keys()):
+					if i == 0:
+						htmlRow.insert(index, release)
+					else:
+						htmlRow.insert(index, platform)
+					index += 1
+			
+			componentHTMLReport.append(htmlRow)
+
+		newHTML["Headers"] = componentHTMLReport
+
+#adding header as part of table
 	print(newHTML)
 	
 	with open("report.html",'w') as w:
