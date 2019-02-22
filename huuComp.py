@@ -222,7 +222,7 @@ def generateComparisonReport(fileList):
 
 #adding headers as part of table
 		componentHTMLReport = []
-
+		'''
 		tableHeaders = [['X', 'X','X','X'], ['X', 'Component','Description','Firmware Version']]
 		index = len(tableHeaders[0])	
 		for i in range(len(tableHeaders)):
@@ -241,7 +241,7 @@ def generateComparisonReport(fileList):
 			componentHTMLReport.append(htmlRow)
 
 		newHTML["Headers"] = componentHTMLReport
-
+		'''
 #adding header as part of table
 
 #generating a table with all rows; starting with headers
