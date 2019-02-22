@@ -34,7 +34,7 @@ def generateComparisonReport(fileList):
 				if skipLine:
 					skipLine = False
 					continue
-
+				print('EACH LINE',line)
 				z = re.search(r'ucs-(.*?)-huu-(.*?).iso', line)
 				if z:
 					platform = z.group(1)
@@ -83,7 +83,7 @@ def generateComparisonReport(fileList):
 				
 				z = re.search(r'^[\s\t]*(HDD)[\s*\t*]+Model[\s\t]+Latest[\s\t]+([Ff][Ww]|firmware)', line, re.MULTILINE|re.IGNORECASE)
 				if z:
-					print('CAP HDD')
+					print('CAP HDD',line)
 					componentName = z.group(1)
 					myDict["Component"].append(componentName)
 					myDict[componentName] = []
