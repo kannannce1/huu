@@ -137,6 +137,22 @@ def hddEnd(r):
 def end_fsm(r):
 	pass
 
+class ParsedContext:
+		def __init__(self):
+				self.finalData = {}
+				self.platform = ""
+				self.release = ""
+				self.myDict["Component"] = []
+				self.lineNo = 
+
+		def set_platform(self, platform):
+			self.platform = platform
+
+		def set_release(self, release):
+			self.platform = platform
+
+		def set_current_lineNo(self, lineNo):
+			self.lineNo = lineNo
 
 def parseReleaseNotes(fileList):
 
