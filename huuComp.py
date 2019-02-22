@@ -285,7 +285,9 @@ def generateComparisonReport(fileList):
 		with open("template.html", 'r') as T:
 			temp = T.read()
 			t = Template(temp)
-			w.write(t.render(rData=newHTML, header=finalData))
+			afterTemplating = t.render(rData=newHTML)
+			print(afterTemplating)
+			w.write(afterTemplating)
 
 def main():
 	generateComparisonReport(sys.argv[1:])

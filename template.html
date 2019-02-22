@@ -2,44 +2,60 @@
 <html>
 <head>
 <meta charset="UTF-8"> 
+<style type="text/css">
+   table, th, td {
+  border: 1px solid black;
+       text-align: right;
+} 
 
-
+    
+</style>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
 <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
 crossorigin="anonymous"></script>
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
-<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
 </head>
 
 <body>
 <h1>UCS C-Series Rack-Mount Standalone Server Software Comparison</h1>
 
-<table id="table_id">
+<table id="example">
 <thead>
-{% for row in rData[0:2]  %}
-	<tr>
-		{% for cell in row  %}
-		<th>{{cell}}</th>
-		{% endfor %}
-	</tr>
-{% endfor  %}
+    {% for component in rData|dictsort %}
+        {% if component[0] == "Headers" %}
+        {% for row in component[1]  %}
+        <tr>
+            {% for cell in row[1:]  %}
+            <th> {{ cell }} </th>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+        {% endif %}
+    {% endfor %}
+        
 </thead>
 
 <tbody>
-    
-{% for row in rData[2:]  %}
-	<tr>
-		{% for cell in row  %}
-		<td>{{cell}}</td>
-		{% endfor %}
-	</tr>
-{% endfor  %}
+    {% for component in rData|dictsort %}
+        {%  if component[0] != "Headers" %}
+        {% for row in component[1] %}
+    <tr>
+            {% for cell in row[1:] %}
+                <td> {{ cell }} </td>
+            {% endfor %}
+    </tr>
+        {% endfor %}
+        {% endif %}
+    {% endfor %}
 </tbody>
 
 </table>
 <script>
 $(document).ready( function () {
-    $('#table_id').DataTable()
-} );
+		    $('#example').DataTable({
+                paging:false
+            });
+				} );
 </script>
 </body>
 </html>
