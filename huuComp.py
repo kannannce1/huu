@@ -3,6 +3,7 @@ import sys
 import re
 import copy
 import logging
+import json
 
 from jinja2 import Template
 
@@ -215,9 +216,33 @@ def generateComparisonReport(fileList):
 
 		newHTML[component] = componentHTMLReport
 
+#adding headers as part of table
+		componentHTMLReport = []
+
+		tableHeaders = [['X', 'X','X','X'], ['X', 'Component','Description','Firmware Version']]
+		index = len(tableHeaders[0])	
+		for i in range(len(tableHeaders)):
+
+			index = len(tableHeaders[i])	
+			htmlRow = ['N'] * totalColumns
+			htmlRow = tableHeaders[i]
+			for release in reversed(sorted(finalData.keys())):
+				for platform in sorted(finalData[release].keys()):
+					if i == 0:
+						htmlRow.insert(index, release)
+					else:
+						htmlRow.insert(index, platform)
+					index += 1
+			
+			componentHTMLReport.append(htmlRow)
+
+		newHTML["Headers"] = componentHTMLReport
+
+#adding header as part of table
+
 #generating a table with all rows; starting with headers
 #no key,value
-
+	'''
 	dataToRender = []
 
 	#adding headers
@@ -246,16 +271,21 @@ def generateComparisonReport(fileList):
 		for row in newHTML[component]:
 			dataToRender.append(row)
 		
+	print(dataToRender)
+	'''
 
 #generating a table with all rows
 #	print(newHTML)
-	print(dataToRender)
+	with open('dataToRender.json', 'w') as J:
+		J.write(json.dumps(newHTML))
+
+	print(newHTML)
 	
 	with open("report.html",'w') as w:
 		with open("template.html", 'r') as T:
 			temp = T.read()
 			t = Template(temp)
-			w.write(t.render(rData=dataToRender, header=finalData))
+			w.write(t.render(rData=newHTML, header=finalData))
 
 def main():
 	generateComparisonReport(sys.argv[1:])
