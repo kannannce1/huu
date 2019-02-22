@@ -118,7 +118,7 @@ def generateComparisonReport(fileList):
 			for n in range(L,R+1):
 				l = re.sub('\s{2,}|\t*(\s)+\t+','#@#@',lines[n].strip('')).split('#@#@')
 				if (len(l) != 3):
-#					print(l,len(l))
+					print('EXCEPTION DETECTED',l,len(l))
 					pass
 				myDict[component].append(l)
 			myDict[component].sort()
@@ -144,7 +144,7 @@ def generateComparisonReport(fileList):
 		del myDict
 	print('myFinalDict-->', finalData)
 
-	totalColumns = 3
+	totalColumns = 4
 	totalRelease = 0
 	totalPlatforms = 0
 
@@ -154,8 +154,8 @@ def generateComparisonReport(fileList):
 			totalPlatforms += 1
 
 	totalColumns = totalPlatforms + totalColumns
-	htmlRow = ['&#10006'] * totalColumns
-	ii = -1
+	htmlRow = ['N'] * totalColumns
+	ii = 0
 
 	newHTML = {}
 
@@ -170,22 +170,25 @@ def generateComparisonReport(fileList):
 				print('PLATFORM', platform)
 				if component in finalData[release][platform].keys():
 					for row in table_rows[component]:
-						
-						htmlRow = ['&#10006'] * totalColumns
-						
-						newL = len(row)
-						markExp = False
-						if newL > 3:
-							row[(3-1):newL] = [''.join(row[(3-1):newL])]
-							markExp = True
-				
-						i = 0
-						for elem in row:
-							htmlRow[i] = elem
-							i += 1	
 							
 						if row in finalData[release][platform][component]:
-							print('CHECKING ROW', row)
+							htmlRow = ['N'] * totalColumns
+							
+							newL = len(row)
+							if newL > 3:
+								row[(3-1):newL] = [''.join(row[(3-1):newL])]
+								htmlRow[0] = '$$@@'
+							elif newL < 3:
+								htmlRow[0] = '$$@@'
+							else:
+								pass
+					
+							i = 1
+
+							for elem in row:
+								htmlRow[i] = elem
+								i += 1	
+								print('CHECKING ROW', row)
 							'''
 							check if 'row' is present in htmlReport
 							if present then mark it Y
@@ -194,7 +197,7 @@ def generateComparisonReport(fileList):
 							indexInHtmlReport = 0
 							rowInHtmlPresent =  False
 							for rowHtml in componentHTMLReport:
-								tempList = [ rowHtml[0], rowHtml[1], rowHtml[2] ]
+								tempList = rowHtml[1:4]
 								if tempList == row:
 									rowInHtmlPresent = True
 									break
@@ -202,11 +205,11 @@ def generateComparisonReport(fileList):
 							
 							if rowInHtmlPresent:
 								print('ROW PRESENT', ii, componentHTMLReport[indexInHtmlReport])
-								componentHTMLReport[indexInHtmlReport][ii + 3] = '&#10003'
+								componentHTMLReport[indexInHtmlReport][ii + 4] = 'Y'
 							else:
 								print('ROW ABSENT')
 								print('ROW INSERTED BEFORE', ii, htmlRow)
-								htmlRow[ii + 3] = '&#10003'
+								htmlRow[ii + 4] = 'Y'
 								print('ROW INSERTED AFTER', ii, htmlRow )
 								componentHTMLReport.append(htmlRow)
 
@@ -218,12 +221,12 @@ def generateComparisonReport(fileList):
 	dataToRender = []
 
 	#adding headers
-	tableHeaders = [['X','X','X'], ['Component','Description','Firmware Version']]
+	tableHeaders = [['', 'X','X','X'], ['', 'Component','Description','Firmware Version']]
 	index = len(tableHeaders[0])	
 	for i in range(len(tableHeaders)):
 
 		index = len(tableHeaders[i])	
-		htmlRow = ['&#10006'] * totalColumns
+		htmlRow = ['N'] * totalColumns
 		htmlRow = tableHeaders[i]
 		for release in reversed(sorted(finalData.keys())):
 			for platform in sorted(finalData[release].keys()):
@@ -237,7 +240,7 @@ def generateComparisonReport(fileList):
 
 	#adding all rows for each component
 	for component in sorted(newHTML.keys()):
-		htmlRow = ['&#10006'] * totalColumns
+		htmlRow = ['N'] * totalColumns
 		htmlRow[0] = component
 		dataToRender.append(htmlRow)
 		for row in newHTML[component]:
