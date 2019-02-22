@@ -6,8 +6,7 @@ import logging
 
 from jinja2 import Template
 
-
-class ReleaseNotesFSM:
+class StateMachine:
 
 	def __init__(self):
 		self.handlers = {}
@@ -40,31 +39,41 @@ class ReleaseNotesFSM:
 			else:
 				handler = self.handlers[newState.upper()]
 
-finalData = {}
-platform = ''
-release = ''
-myDict = {}
-myDict["Component"] = []
+class ParsedContext:
+		def __init__(self):
+				self.finalData = {}
+				self.platform = ""
+				self.release = ""
+				self.myDict["Component"] = []
+				self.lineNo = 
+
+		def set_platform(self, platform):
+			self.platform = platform
+
+		def set_release(self, release):
+			self.platform = platform
+
+		def set_current_lineNo(self, lineNo):
+			self.lineNo = lineNo
 
 def start_fsm(lines):
 	newState = "rel_and_platform"
 	return (newState, lines)
 
-def isReleaseAndPlatform(lines):
+def isReleaseAndPlatform(cntxt, lines):
 
 	line = lines[0]
-	global platform
-	global release
 
 	z = re.search(r'ucs-(.*?)-huu-(.*?).iso', line)
 	if z:
-		platform = z.group(1)
-		release  = z.group(2)
+
+		cntxt.set_platform(z.group(1))
+		cntxt.set_release(z.group(2))
 		
-		if release != "":
-			if release in finalData.keys():
-				if platform != "":
-					if platform in finalData[release].keys():
+		if cntxt.release != "":
+			if cntxt.release in finalData.keys():
+				if cntxt.platform != "":
+					if cntxt.platform in finalData[release].keys():
 						print('dropping & exiting since '+ i +' already processed\n')
 						sys.exit()
 					finalData[release][platform] = {}
@@ -131,7 +140,7 @@ def end_fsm(r):
 
 def parseReleaseNotes(fileList):
 
-	m = ReleaseNotesFSM()
+	m = StateMachine()
 
 	m.add_state("Start", start_fsm)
 	m.add_state("rel_and_platform", isReleaseAndPlatform)
