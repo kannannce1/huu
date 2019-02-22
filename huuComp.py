@@ -64,14 +64,17 @@ def generateComparisonReport(fileList):
 				z = re.search(r'^\s*(\b([A-Z-]+){1}\b)\s*$', line)
 				if z:
 					componentName = z.group(1)
+					print('Found',componentName)
 					myDict["Component"].append(componentName)
 					myDict[componentName] = []
 					myDict[componentName].append(lineNo)
 					captureStart = True
 
 				if captureStart:
+					print('CAP START', line, lineNo)
 					z = re.search(r'(^[\s]*[-]+[\s]*$)|(^[\s]*$|^HDD)', line)
 					if z:
+						print('CAP MATCH', z.group(1), z.group(2))
 						captureStart = False
 						componentName = "DUMMY1"
 						myDict["Component"].append(componentName)
@@ -80,6 +83,7 @@ def generateComparisonReport(fileList):
 				
 				z = re.search(r'^[\s\t]*(HDD)[\s*\t*]+Model[\s\t]+Latest[\s\t]+([Ff][Ww]|firmware)', line, re.MULTILINE|re.IGNORECASE)
 				if z:
+					print('CAP HDD')
 					componentName = z.group(1)
 					myDict["Component"].append(componentName)
 					myDict[componentName] = []
@@ -285,7 +289,7 @@ def generateComparisonReport(fileList):
 		with open("template.html", 'r') as T:
 			temp = T.read()
 			t = Template(temp)
-			afterTemplating = t.render(rData=newHTML)
+			afterTemplating = t.render(rData=newHTML, header=finalData)
 			print(afterTemplating)
 			w.write(afterTemplating)
 
