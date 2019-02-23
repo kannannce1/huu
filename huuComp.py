@@ -147,6 +147,7 @@ def fetchHddComponent(ctx, lines):
 	z = re.search(r'^[\s\t]*(HDD)[\s*\t*]+Model[\s\t]+Latest[\s\t]+([Ff][Ww]|firmware)', line, re.MULTILINE|re.IGNORECASE)
 	if z:
 		componentName = z.group(1)
+		logging.info('Matched component %s lineNo=%s line=%s', componentName, ctx.current_lineNo, line)
 		ctx.myDict["Component"].append(componentName)
 		ctx.myDict[componentName] = []
 		ctx.myDict[componentName].append(ctx.current_lineNo + 1)
@@ -177,7 +178,7 @@ def addDummyMarkerAfterHdd(ctx, lines):
 	componentName = "DUMMY2"
 	ctx.myDict["Component"].append(componentName)
 	ctx.myDict[componentName] = []
-	ctx.myDict[componentName].append(ctx.current_lineNo + 1)
+	ctx.myDict[componentName].append(ctx.current_lineNo -1) 
 	newState = 'END'
 
 	return (newState, lines[1:])
@@ -216,7 +217,9 @@ def processParsedData(ctx):
 		L = ctx.myDict[component][0] + 1
 		R = ctx.myDict[ctx.myDict["Component"][ctx.myDict["Component"].index(component)+1]][0] - 1
 		del ctx.myDict[component][0]
+		logging.info('L=%s,R=%s',L,R)
 		for n in range(L,R+1):
+			logging.info('L=%s:,R=%s: n=%s:, line[n]=%s:',L,R,n,ctx.lines[n])
 			l = re.sub('\s{2,}|\t*(\s)+\t+','#@#@',ctx.lines[n].strip('')).split('#@#@')
 			if (len(l) != 3):
 #					print(l,len(l))
