@@ -22,7 +22,7 @@ class StateMachine:
 	def set_start(self, name):
 		self.startState = name.upper()
 
-	def run(self, cargo):
+	def run(self, ctx, fileData):
 		try:
 			handler = self.handlers[self.startState]
 		except:
@@ -31,155 +31,264 @@ class StateMachine:
 			raise  InitializationError("at least one state must be an end_state")
 
 		while True:
-			print('in run')
-			(newState, cargo) = handler(cargo)
+			(newState, fileData) = handler(ctx, fileData)
+			ctx.current_lineNo += 1
 			if newState.upper() in self.endStates:
-				print("reached ", newState)
+				logging.info("Moving into end state %s", newState)
 				break 
 			else:
+				logging.debug("Moving into %s", newState)
+				ctx.current_state = newState
 				handler = self.handlers[newState.upper()]
 
-class ParsedContext:
-		def __init__(self):
-				self.finalData = {}
-				self.platform = ""
-				self.release = ""
-				self.myDict["Component"] = []
-				self.lineNo = 
-
-		def set_platform(self, platform):
-			self.platform = platform
-
-		def set_release(self, release):
-			self.platform = platform
-
-		def set_current_lineNo(self, lineNo):
-			self.lineNo = lineNo
-
-def start_fsm(lines):
-	newState = "rel_and_platform"
+def startFSM(ctx, lines):
+	logging.info('Entering %s', ctx.current_state)
+	newState = "FETCH_REL_PLAT"
 	return (newState, lines)
 
-def isReleaseAndPlatform(cntxt, lines):
+def fetchReleaseAndPlatform(ctx, lines):
 
-	line = lines[0]
+	try:
+	    line = lines[0]
+	except IndexError:
+		line = 'null'
+		newState = "MISSING_REL_PLAT"
+		return (newState, lines)
+			
+	platform = ""
+	release  = ""
 
 	z = re.search(r'ucs-(.*?)-huu-(.*?).iso', line)
 	if z:
 
-		cntxt.set_platform(z.group(1))
-		cntxt.set_release(z.group(2))
+		platform = z.group(1)
+		release = z.group(2)
 		
-		if cntxt.release != "":
-			if cntxt.release in finalData.keys():
-				if cntxt.platform != "":
-					if cntxt.platform in finalData[release].keys():
-						print('dropping & exiting since '+ i +' already processed\n')
+		if release != "":
+			if release in ctx.finalData.keys():
+				if platform != "":
+					if platform in ctx.finalData[release].keys():
+						logging.critical('dropping & exiting since '+ i +' already processed\n')
 						sys.exit()
-					finalData[release][platform] = {}
+					ctx.finalData[release][platform] = {}
 				else:
-					print("Error fetching 'platform'")
+					logging.critical("Error fetching 'Platform'")
 					sys.exit()
 			else:
-				finalData[release] = {}
+				ctx.finalData[release] = {}
 				if platform != "" :
-					finalData[release][platform] = {}
+					ctx.finalData[release][platform] = {}
 				else:
-					print("Error fetching 'platform'")
+					logging.critical("Error fetching 'Platform'")
 					sys.exit()
 					
 		else:
-		   print("Error fetching 'release'")
+		   logging.CRITICAL("Error fetching 'Release'")
 		   sys.exit()
 
 	if platform != "" and release != "":
-		newState = "component_start"
+		ctx.release = release
+		ctx.platform = platform
+		logging.info('RELEASE %s PLATFORM %s line %s', release, platform, ctx.current_lineNo)
+		newState = "FETCH_COMPONENTS"
 	else:
-		newState = "rel_and_platform"
-
+		newState = "FETCH_REL_PLAT"
+	
 	return (newState, lines[1:])
 
-def componentStart(lines):
+def fetchComponents(ctx, lines):
+	try:
+	    line = lines[0]
+	except IndexError:
+		line = 'null'
+		newState = "EOF_IN_FETCH_COMPONENTS"
+		return (newState, lines)
+
 	componentName = ""
+	newState = ctx.current_state
 
-	global myDict
-
-	z = re.search(r'^\s*(\b([A-Z-]+){1}\b)\s*$', lines[0])
+	z = re.search(r'^\s*(\b([A-Z-]+){1}\b)\s*$', line)
 	if z:
 		componentName = z.group(1)
-		myDict["Component"].append(componentName)
-		myDict[componentName] = []
-		myDict[componentName].append(lineNo)
+		ctx.myDict["Component"].append(componentName)
+		ctx.myDict[componentName] = []
+		ctx.myDict[componentName].append(ctx.current_lineNo)
+	
+		if componentName != "":
+			logging.info("COMPONENT: %s", componentName)
+		else:
+			assert (False),'Component Name absent'
+		newState = 'FETCH_COMPONENTS_DATA'
+		return (newState, lines[1:])
+	
+	if newState == 'FETCH_COMPONENTS_DATA':
+			z = re.search(r'(^[\s]*[-]+[\s]*$)|(^[\s]*$|^HDD)', line)
+			if z:
+				logging.debug("Adding DUMMY1")
+				componentName = "DUMMY1"
+				ctx.myDict["Component"].append(componentName)
+				ctx.myDict[componentName] = []
+				ctx.myDict[componentName].append(ctx.current_lineNo)
+				newState = 'FETCH_HDD_COMPONENT'
 
-	if componentName != "":
-		newState = "component_rows"
-	else:
-		newState = "component_start"
-
-	print(componentName)
 	return (newState, lines[1:])
 
-def componentRows(lines):
-	return ('missing_hdd_end', lines[1:] )
+def fetchHddComponent(ctx, lines):
+	try:
+	    line = lines[0]
+	except IndexError:
+		line = 'null'
+		newState = 'EOF_IN_FETCH_HDD_COMPONENT'
+		return (newState, lines)
 
-def componentsEnd(r):
+	componentName = ""
+	newState = ctx.current_state
+
+	z = re.search(r'^[\s\t]*(HDD)[\s*\t*]+Model[\s\t]+Latest[\s\t]+([Ff][Ww]|firmware)', line, re.MULTILINE|re.IGNORECASE)
+	if z:
+		componentName = z.group(1)
+		ctx.myDict["Component"].append(componentName)
+		ctx.myDict[componentName] = []
+		ctx.myDict[componentName].append(ctx.current_lineNo + 1)
+
+		if componentName != "":
+			logging.info("HDD COMPONENT: %s", componentName)
+		else:
+			assert (False),'HDD Component Name absent'
+
+		newState = 'FETCH_HDD_COMPONENT_DATA'
+		return (newState, lines[2:])
+
+	if newState == 'FETCH_HDD_COMPONENT_DATA':
+		z = re.search(r'(^[\s]*[-]+[\s]*$)|(^[\s]*$)', line)
+		if z:
+			logging.debug("Adding DUMMY2")
+			componentName = "DUMMY2"
+			ctx.myDict["Component"].append(componentName)
+			ctx.myDict[componentName] = []
+			ctx.myDict[componentName].append(ctx.current_lineNo + 1)
+			newState = 'END'
+
+	return (newState, lines[1:])
+
+def addDummyMarkerAfterHdd(ctx, lines):
+
+	logging.debug("Adding DUMMY2")
+	componentName = "DUMMY2"
+	ctx.myDict["Component"].append(componentName)
+	ctx.myDict[componentName] = []
+	ctx.myDict[componentName].append(ctx.current_lineNo + 1)
+	newState = 'END'
+
+	return (newState, lines[1:])
+
+def end_fsm(ctx, lines):
+
+	logging.info('END OF SUCCESSFUL FILE PARSING')
+	logging.info('ReleaseNotes parsed data %s', ctx.myDict)
+
+	processParsedData(ctx)
+	ctx.release = ''
+	ctx.platform = ''
+	ctx.myDict = {}
+	ctx.myDict["Component"] = []
+	ctx.current_lineNo = -1
+	newState = 'CLEANUP'
+	return (newState, lines)
+
+def cleanUp(ctx, lines):
 	pass
 
-def hddStart(r):
-	pass
+def processParsedData(ctx):
+	'''
+	1. Take one by one the Components C1
+	2. For each component, note its L = index+!
+	3. Go to next compenent C2 in list and not its R = index - 1
+	4. Grab the lines for C1 --> (L,R)
+	5. Append these lines for C1 key into the key's array
+	'''
+	release = ctx.release
+	platform = ctx.platform
 
-def hddRows(r):
-	pass
-
-def hddEnd(r):
-	pass
-
-def end_fsm(r):
-	pass
+	for component in ctx.myDict["Component"]:
+		if component == "DUMMY1" or component == "DUMMY2":
+			continue
+		L = ctx.myDict[component][0] + 1
+		R = ctx.myDict[ctx.myDict["Component"][ctx.myDict["Component"].index(component)+1]][0] - 1
+		del ctx.myDict[component][0]
+		for n in range(L,R+1):
+			l = re.sub('\s{2,}|\t*(\s)+\t+','#@#@',ctx.lines[n].strip('')).split('#@#@')
+			if (len(l) != 3):
+#					print(l,len(l))
+				pass
+			ctx.myDict[component].append(l)
+		ctx.myDict[component].sort()
+		
+		if component in ctx.table_rows.keys():
+			for elem in ctx.myDict[component]:
+				if elem in ctx.table_rows[component]:
+					continue
+				else:
+					ctx.table_rows[component].append(elem)
+			ctx.table_rows[component].sort(key=lambda x: x[0])
+		else:
+			ctx.table_rows[component] = ctx.myDict[component] 
+			ctx.table_rows[component].sort(key=lambda x: x[0])
+		
+	ctx.myDict["Component"].remove("DUMMY1")
+	ctx.myDict["Component"].remove("DUMMY2")
+	del ctx.myDict["DUMMY1"]
+	del ctx.myDict["DUMMY2"]
+	ctx.myDict["Component"].sort()
+	ctx.finalData[release][platform] = copy.deepcopy(ctx.myDict)
+	logging.info('ctx.myDictionary: %s', ctx.myDict)
+	del ctx.myDict
 
 class ParsedContext:
-		def __init__(self):
-				self.finalData = {}
-				self.platform = ""
-				self.release = ""
-				self.myDict["Component"] = []
-				self.lineNo = 
-
-		def set_platform(self, platform):
-			self.platform = platform
-
-		def set_release(self, release):
-			self.platform = platform
-
-		def set_current_lineNo(self, lineNo):
-			self.lineNo = lineNo
+	def __init__(self):
+		self.current_state = "START"
+		self.release = ''
+		self.platform = ''
+		self.finalData = {}
+		self.myDict = {}
+		self.myDict["Component"] = []
+		self.current_lineNo = -1
+		self.lines = []
+		self.table_rows = {}
 
 def parseReleaseNotes(fileList):
 
+	logging.basicConfig(filename='oneview.log', filemode='w', format='%(levelname)s - %(message)s', level=logging.INFO)
+#	logging.basicConfig(format='%(levelname)s - %(message)s', level=logging.DEBUG)
+	
 	m = StateMachine()
 
-	m.add_state("Start", start_fsm)
-	m.add_state("rel_and_platform", isReleaseAndPlatform)
-	m.add_state("component_start", componentStart)
-	m.add_state("component_rows", componentRows)
-	m.add_state("components_end", componentsEnd)
-	m.add_state("hdd_start", hddStart)
-	m.add_state("hdd_rows", hddRows)
-	m.add_state("hdd_end", hddEnd)
-	m.add_state("End", end_fsm)
-	m.add_state("missing_rel_and_platform", None, end_state=1)	
-	m.add_state("missing_component", None, end_state=1)	
-	m.add_state("missing_component_end", None, end_state=1)	
-	m.add_state("missing_hdd", None, end_state=1)	
-	m.add_state("missing_hdd_end", None, end_state=1)	
+	m.add_state("START", startFSM)
+	m.add_state("FETCH_REL_PLAT", fetchReleaseAndPlatform)
+	m.add_state("FETCH_COMPONENTS", fetchComponents)
+	m.add_state("FETCH_COMPONENTS_DATA", fetchComponents)
+	m.add_state("FETCH_HDD_COMPONENT", fetchHddComponent)
+	m.add_state("FETCH_HDD_COMPONENT_DATA", fetchHddComponent)
+	m.add_state("MISSING_REL_PLAT", None, end_state=1)	
+	m.add_state("MISSING_COMPONENTS", None, end_state=1)	
+	m.add_state("MISSING_HDD_COMPONENT", None, end_state=1)	
+	m.add_state("MISSING_COMPONENT_END_MAKRER", None, end_state=1)	
+	m.add_state("EOF_IN_FETCH_COMPONENTS", None, end_state=1)
+	m.add_state("EOF_IN_FETCH_HDD_COMPONENT", addDummyMarkerAfterHdd)
+	m.add_state("END", end_fsm)
+	m.add_state("CLEANUP", None, end_state=1)
+
+	ctx = ParsedContext()
 
 	for i in fileList:
-		m.set_start("Start")
 		with open(i, 'r') as f:
-			lines = f.readlines()
-			lines =list(map(str.strip, lines))
-			lines = list(filter(lambda a: a != '', lines))
-			m.run(lines)
+			ctx.current_state = 'START'
+			m.set_start("START")
+			logging.info('Now Parsing: %s', i)
+			ctx.lines = f.readlines()
+			ctx.lines =list(map(str.strip, ctx.lines))
+			ctx.lines = list(filter(lambda a: a != '', ctx.lines))
+			m.run(ctx, ctx.lines)
  
 def generateComparisonReport(fileList):
 	#open all the files
