@@ -32,11 +32,11 @@ class StateMachine:
 
 		while True:
 			(newState, fileData) = handler(ctx, fileData)
-			ctx.current_lineNo += 1
 			if newState.upper() in self.endStates:
 				logging.info("Moving into end state %s", newState)
 				break 
 			else:
+				ctx.current_lineNo += 1
 				logging.debug("Moving into %s", newState)
 				ctx.current_state = newState
 				handler = self.handlers[newState.upper()]
@@ -218,7 +218,7 @@ def processParsedData(ctx):
 		R = ctx.myDict[ctx.myDict["Component"][ctx.myDict["Component"].index(component)+1]][0] - 1
 		del ctx.myDict[component][0]
 		for n in range(L,R+1):
-			logging.info('L=%s:,R=%s: n=%s:, line[n]=%s:',L,R,n,ctx.lines[n])
+			logging.debug('L=%s:,R=%s: n=%s:, line[n]=%s:',L,R,n,ctx.lines[n])
 			l = re.sub('\s{2,}|\t*(\s)+\t+','#@#@',ctx.lines[n].strip('')).split('#@#@')
 			if (len(l) != 3):
 #					print(l,len(l))
@@ -260,7 +260,7 @@ class ParsedContext:
 
 def parseReleaseNotes(fileList):
 
-	logging.basicConfig(filename='oneview.log', filemode='w', format='%(levelname)s - %(message)s', level=logging.INFO)
+	logging.basicConfig(filename='oneview.log', filemode='w', format='%(levelname)s - %(message)s', level=logging.DEBUG)
 #	logging.basicConfig(format='%(levelname)s - %(message)s', level=logging.DEBUG)
 	
 	m = StateMachine()
@@ -286,11 +286,12 @@ def parseReleaseNotes(fileList):
 		with open(i, 'r') as f:
 			ctx.current_state = 'START'
 			m.set_start("START")
-			logging.info('Now Parsing: %s', i)
+			logging.info('Now Parsing: %s, from file=%s', i, ctx.current_lineNo)
 			ctx.lines = f.readlines()
 			ctx.lines =list(map(str.strip, ctx.lines))
 			ctx.lines = list(filter(lambda a: a != '', ctx.lines))
 			m.run(ctx, ctx.lines)
+	logging.info('MERGED data: %s', ctx.finalData)
  
 def generateComparisonReport(fileList):
 	#open all the files
