@@ -68,8 +68,9 @@ def fetchReleaseAndPlatform(ctx, lines):
 			if release in ctx.finalData.keys():
 				if platform != "":
 					if platform in ctx.finalData[release].keys():
-						logging.critical('dropping & exiting since '+ i +' already processed\n')
-						sys.exit()
+						logging.critical('duplicate REL=%s PLAT=%s, skipping', release, platform)
+						newState = 'DUPLICATE_REL_PLAT'
+						return (newState, lines[1:])
 					ctx.finalData[release][platform] = {}
 				else:
 					logging.critical("Error fetching 'Platform'")
@@ -261,6 +262,77 @@ def processParsedData(ctx):
 	logging.info('ctx.myDictionary: %s', ctx.myDict)
 	del ctx.myDict
 
+def generateHtmlCompatibleData(ctx):
+	totalColumns = 3
+	totalRelease = 0
+	totalPlatforms = 0
+
+	release = ctx.release
+	platform = ctx.platform
+
+	for release in reversed(sorted(ctx.finalData.keys())):
+		totalRelease += 1
+		for platform in sorted(ctx.finalData[release].keys()):
+			totalPlatforms += 1
+
+	totalColumns = totalPlatforms + totalColumns
+	htmlRow = ['N'] * totalColumns
+	ii = -1
+
+	for component in sorted(ctx.table_rows.keys()):
+		ctx.newHTML[component] = []
+		componentHTMLReport = []
+		ii = -1
+		for release in reversed(sorted(ctx.finalData.keys())):
+			for platform in sorted(ctx.finalData[release].keys()):
+				ii += 1
+				if component in ctx.finalData[release][platform].keys():
+					for row in ctx.table_rows[component]:
+						
+						htmlRow = ['N'] * totalColumns
+						
+						newL = len(row)
+						markExp = False
+						if newL > 3:
+							row[(3-1):newL] = [''.join(row[(3-1):newL])]
+							markExp = True
+				
+						i = 0
+						for elem in row:
+							htmlRow[i] = elem
+							i += 1	
+							
+						if row in ctx.finalData[release][platform][component]:
+							'''
+							check if 'row' is present in htmlReport
+							if present then mark it Y
+							if not present then add it and mark it Y
+							'''
+							indexInHtmlReport = 0
+							rowInHtmlPresent =  False
+							for rowHtml in componentHTMLReport:
+								tempList = [ rowHtml[0], rowHtml[1], rowHtml[2] ]
+								if tempList == row:
+									rowInHtmlPresent = True
+									break
+								indexInHtmlReport += 1
+							
+							if rowInHtmlPresent:
+								componentHTMLReport[indexInHtmlReport][ii + 3] = 'Y'
+							else:
+								htmlRow[ii + 3] = 'Y'
+								componentHTMLReport.append(htmlRow)
+
+		ctx.newHTML[component] = componentHTMLReport
+	logging.debug('FINAL HTML RAW: %s', ctx.newHTML)
+
+def generateHTML(ctx):
+	with open("report.html",'w') as w:
+		with open("template.html", 'r') as T:
+			temp = T.read()
+			t = Template(temp)
+			w.write(t.render(rData=ctx.newHTML, header=ctx.finalData))
+
 class ParsedContext:
 	def __init__(self):
 		self.current_state = "START"
@@ -272,6 +344,7 @@ class ParsedContext:
 		self.current_lineNo = -1
 		self.lines = []
 		self.table_rows = {}
+		self.newHTML = {}
 
 def parseReleaseNotes(fileList):
 
@@ -286,6 +359,7 @@ def parseReleaseNotes(fileList):
 	m.add_state("FETCH_HDD_COMPONENT", fetchHddComponent)
 	m.add_state("FETCH_HDD_COMPONENT_DATA", fetchHddComponent)
 	m.add_state("MISSING_REL_PLAT", end_fsm_error)	
+	m.add_state("DUPLICATE_REL_PLAT", end_fsm_error)	
 	m.add_state("MISSING_COMPONENTS", end_fsm_error)	
 	m.add_state("MISSING_HDD_COMPONENT", end_fsm_error)	
 	m.add_state("EOF_IN_FETCH_HDD_COMPONENT", addDummyMarkerAfterHdd)
@@ -303,7 +377,10 @@ def parseReleaseNotes(fileList):
 			ctx.lines =list(map(str.strip, ctx.lines))
 			ctx.lines = list(filter(lambda a: a != '', ctx.lines))
 			m.run(ctx, ctx.lines)
+
 	logging.info('MERGED data: %s', ctx.finalData)
+	generateHtmlCompatibleData(ctx)
+	generateHTML(ctx)
  
 def generateComparisonReport(fileList):
 	#open all the files
@@ -453,7 +530,7 @@ def generateComparisonReport(fileList):
 			totalPlatforms += 1
 
 	totalColumns = totalPlatforms + totalColumns
-	htmlRow = ['&#10006'] * totalColumns
+	htmlRow = ['N'] * totalColumns
 	ii = -1
 
 	newHTML = {}
@@ -470,7 +547,7 @@ def generateComparisonReport(fileList):
 				if component in finalData[release][platform].keys():
 					for row in table_rows[component]:
 						
-						htmlRow = ['&#10006'] * totalColumns
+						htmlRow = ['N'] * totalColumns
 						
 						newL = len(row)
 						markExp = False
@@ -501,11 +578,11 @@ def generateComparisonReport(fileList):
 							
 							if rowInHtmlPresent:
 								print('ROW PRESENT', ii, componentHTMLReport[indexInHtmlReport])
-								componentHTMLReport[indexInHtmlReport][ii + 3] = '&#10003'
+								componentHTMLReport[indexInHtmlReport][ii + 3] = 'Y'
 							else:
 								print('ROW ABSENT')
 								print('ROW INSERTED BEFORE', ii, htmlRow)
-								htmlRow[ii + 3] = '&#10003'
+								htmlRow[ii + 3] = 'Y'
 								print('ROW INSERTED AFTER', ii, htmlRow )
 								componentHTMLReport.append(htmlRow)
 
@@ -522,7 +599,7 @@ def generateComparisonReport(fileList):
 	for i in range(len(tableHeaders)):
 
 		index = len(tableHeaders[i])	
-		htmlRow = ['&#10006'] * totalColumns
+		htmlRow = ['N'] * totalColumns
 		htmlRow = tableHeaders[i]
 		for release in reversed(sorted(finalData.keys())):
 			for platform in sorted(finalData[release].keys()):
@@ -536,7 +613,7 @@ def generateComparisonReport(fileList):
 
 	#adding all rows for each component
 	for component in sorted(newHTML.keys()):
-		htmlRow = ['&#10006'] * totalColumns
+		htmlRow = ['N'] * totalColumns
 		htmlRow[0] = component
 		dataToRender.append(htmlRow)
 		for row in newHTML[component]:
