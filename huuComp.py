@@ -262,8 +262,7 @@ def processParsedData(ctx):
 	logging.info('ctx.myDictionary: %s', ctx.myDict)
 	del ctx.myDict
 
-def generateHtmlCompatibleData(ctx):
-	totalColumns = 3
+	totalColumns = 4
 	totalRelease = 0
 	totalPlatforms = 0
 
@@ -277,7 +276,7 @@ def generateHtmlCompatibleData(ctx):
 
 	totalColumns = totalPlatforms + totalColumns
 	htmlRow = ['N'] * totalColumns
-	ii = -1
+	ii = 0
 
 	for component in sorted(ctx.table_rows.keys()):
 		ctx.newHTML[component] = []
@@ -286,23 +285,27 @@ def generateHtmlCompatibleData(ctx):
 		for release in reversed(sorted(ctx.finalData.keys())):
 			for platform in sorted(ctx.finalData[release].keys()):
 				ii += 1
-				if component in ctx.finalData[release][platform].keys():
-					for row in ctx.table_rows[component]:
-						
-						htmlRow = ['N'] * totalColumns
-						
-						newL = len(row)
-						markExp = False
-						if newL > 3:
-							row[(3-1):newL] = [''.join(row[(3-1):newL])]
-							markExp = True
-				
-						i = 0
-						for elem in row:
-							htmlRow[i] = elem
-							i += 1	
+				if component in finalData[release][platform].keys():
+					for row in table_rows[component]:
 							
 						if row in ctx.finalData[release][platform][component]:
+							htmlRow = ['N'] * totalColumns
+							
+							newL = len(row)
+							if newL > 3:
+								row[(3-1):newL] = [''.join(row[(3-1):newL])]
+								htmlRow[0] = '$$@@'
+							elif newL < 3:
+								htmlRow[0] = '$$@@'
+							else:
+								pass
+					
+							i = 1
+
+							for elem in row:
+								htmlRow[i] = elem
+								i += 1	
+								print('CHECKING ROW', row)
 							'''
 							check if 'row' is present in htmlReport
 							if present then mark it Y
@@ -311,20 +314,19 @@ def generateHtmlCompatibleData(ctx):
 							indexInHtmlReport = 0
 							rowInHtmlPresent =  False
 							for rowHtml in componentHTMLReport:
-								tempList = [ rowHtml[0], rowHtml[1], rowHtml[2] ]
+								tempList = rowHtml[1:4]
 								if tempList == row:
 									rowInHtmlPresent = True
 									break
 								indexInHtmlReport += 1
 							
 							if rowInHtmlPresent:
-								componentHTMLReport[indexInHtmlReport][ii + 3] = 'Y'
+								componentHTMLReport[indexInHtmlReport][ii + 4] = 'Y'
 							else:
-								htmlRow[ii + 3] = 'Y'
+								htmlRow[ii + 4] = 'Y'
 								componentHTMLReport.append(htmlRow)
 
-		ctx.newHTML[component] = componentHTMLReport
-	logging.debug('FINAL HTML RAW: %s', ctx.newHTML)
+		newHTML[component] = componentHTMLReport
 
 def generateHTML(ctx):
 	with open("report.html",'w') as w:
