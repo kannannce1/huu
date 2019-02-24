@@ -101,7 +101,7 @@ def fetchComponents(ctx, lines):
 	    line = lines[0]
 	except IndexError:
 		line = 'null'
-		newState = "EOF_IN_FETCH_COMPONENTS"
+		newState = "MISSING_COMPONENTS"
 		return (newState, lines)
 
 	componentName = ""
@@ -138,7 +138,10 @@ def fetchHddComponent(ctx, lines):
 	    line = lines[0]
 	except IndexError:
 		line = 'null'
-		newState = 'EOF_IN_FETCH_HDD_COMPONENT'
+		if ctx.current_state == 'FETCH_HDD_COMPONENT':
+			newState = 'MISSING_HDD_COMPONENT'
+		else:
+			newState = 'EOF_IN_FETCH_HDD_COMPONENT'
 		return (newState, lines)
 
 	componentName = ""
@@ -189,6 +192,18 @@ def end_fsm(ctx, lines):
 	logging.info('ReleaseNotes parsed data %s', ctx.myDict)
 
 	processParsedData(ctx)
+	ctx.release = ''
+	ctx.platform = ''
+	ctx.myDict = {}
+	ctx.myDict["Component"] = []
+	ctx.current_lineNo = -1
+	newState = 'CLEANUP'
+	return (newState, lines)
+
+def end_fsm_error(ctx, lines):
+
+	logging.info('FILE PARSING FAILED: skipping this file')
+
 	ctx.release = ''
 	ctx.platform = ''
 	ctx.myDict = {}
@@ -261,7 +276,6 @@ class ParsedContext:
 def parseReleaseNotes(fileList):
 
 	logging.basicConfig(filename='oneview.log', filemode='w', format='%(levelname)s - %(message)s', level=logging.DEBUG)
-#	logging.basicConfig(format='%(levelname)s - %(message)s', level=logging.DEBUG)
 	
 	m = StateMachine()
 
@@ -271,11 +285,9 @@ def parseReleaseNotes(fileList):
 	m.add_state("FETCH_COMPONENTS_DATA", fetchComponents)
 	m.add_state("FETCH_HDD_COMPONENT", fetchHddComponent)
 	m.add_state("FETCH_HDD_COMPONENT_DATA", fetchHddComponent)
-	m.add_state("MISSING_REL_PLAT", None, end_state=1)	
-	m.add_state("MISSING_COMPONENTS", None, end_state=1)	
-	m.add_state("MISSING_HDD_COMPONENT", None, end_state=1)	
-	m.add_state("MISSING_COMPONENT_END_MAKRER", None, end_state=1)	
-	m.add_state("EOF_IN_FETCH_COMPONENTS", None, end_state=1)
+	m.add_state("MISSING_REL_PLAT", end_fsm_error)	
+	m.add_state("MISSING_COMPONENTS", end_fsm_error)	
+	m.add_state("MISSING_HDD_COMPONENT", end_fsm_error)	
 	m.add_state("EOF_IN_FETCH_HDD_COMPONENT", addDummyMarkerAfterHdd)
 	m.add_state("END", end_fsm)
 	m.add_state("CLEANUP", None, end_state=1)
