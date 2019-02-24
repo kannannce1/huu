@@ -262,6 +262,8 @@ def processParsedData(ctx):
 	logging.info('ctx.myDictionary: %s', ctx.myDict)
 	del ctx.myDict
 
+def generateHtmlCompatibleData(ctx):
+
 	totalColumns = 4
 	totalRelease = 0
 	totalPlatforms = 0
@@ -285,8 +287,8 @@ def processParsedData(ctx):
 		for release in reversed(sorted(ctx.finalData.keys())):
 			for platform in sorted(ctx.finalData[release].keys()):
 				ii += 1
-				if component in finalData[release][platform].keys():
-					for row in table_rows[component]:
+				if component in ctx.finalData[release][platform].keys():
+					for row in ctx.table_rows[component]:
 							
 						if row in ctx.finalData[release][platform][component]:
 							htmlRow = ['N'] * totalColumns
@@ -326,7 +328,7 @@ def processParsedData(ctx):
 								htmlRow[ii + 4] = 'Y'
 								componentHTMLReport.append(htmlRow)
 
-		newHTML[component] = componentHTMLReport
+		ctx.newHTML[component] = componentHTMLReport
 
 def generateHTML(ctx):
 	with open("report.html",'w') as w:

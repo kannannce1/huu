@@ -15,25 +15,40 @@ crossorigin="anonymous"></script>
 
 <table id="table_id">
 <thead>
-{% for row in rData[0:2]  %}
-	<tr>
-		{% for cell in row  %}
-		<th>{{cell}}</th>
-		{% endfor %}
-	</tr>
-{% endfor  %}
+
+<tr>
+<th>X</th>
+<th>X</th>
+<th>X</th>
+{% for release in header|dictsort(reverse=true)%}
+<th>{{ release[0]  }}</th>
+{% endfor %}
+</tr>
+
+<tr>
+<th>Component</th>
+<th>Description</th>
+<th>Firmware</th>
+
+{% for release in header|dictsort(reverse=true)%}
+{% for platform in header[release[0]]|dictsort%}
+<th>{{ platform[0]}}</th>
+{% endfor %}
+{% endfor %}
+</tr>
 </thead>
 
 <tbody>
-    
-{% for row in rData[2:]  %}
-	<tr>
-		{% for cell in row  %}
-		<td>{{cell}}</td>
-		{% endfor %}
-	</tr>
-{% endfor  %}
-</tbody>
+
+{% for component in rData|dictsort %}
+{% for blob in component[1]  %}
+<tr>
+{% for row in blob %}
+<th>{{row}}</th>
+{% endfor %}
+</tr>
+{% endfor %}
+{% endfor %}
 
 </table>
 <script>
