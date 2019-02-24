@@ -41,10 +41,10 @@ crossorigin="anonymous"></script>
 <tbody>
 
 {% for component in rData|dictsort %}
-{% for blob in component[1]  %}
+{% for row in component[1]  %}
 <tr>
-{% for row in blob %}
-<th>{{row}}</th>
+{% for cell in row %}
+<th >{{cell}}</th>
 {% endfor %}
 </tr>
 {% endfor %}
