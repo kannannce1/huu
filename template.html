@@ -52,7 +52,11 @@ h1  {
 }
 
 .dataTables_filter {
-    margin: 0 0 10px 0;
+    margin: -4.5em 0 10px 0;
+}
+
+.dataTables_filter label{
+    color:white;
 }
 
 table.dataTable.stripe tbody tr.odd, table.dataTable.display tbody tr.odd {
@@ -130,14 +134,35 @@ height:0px;
 }
 
 
+table.dataTable thead tr:first-child th {
+
+   background-color: #097DBC !important
+}
+
+.toggle-vis{
+margin: 0 5px
+}
+
     
 </style>
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/fixedcolumns/3.2.6/css/fixedColumns.dataTables.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.5.4/css/buttons.dataTables.min.css">
 
 <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
 <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/fixedcolumns/3.2.6/js/dataTables.fixedColumns.min.js"></script>
+<script src="https://cdn.datatables.net/plug-ins/1.10.19/features/pageResize/dataTables.pageResize.min.js"></script>
+
+
+<script src="https://cdn.datatables.net/buttons/1.5.4/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.5.4/js/buttons.flash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.5.4/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.5.4/js/buttons.print.min.js"></script>
+
 </head>
 
 <body>
@@ -148,10 +173,12 @@ height:0px;
 
 
 {% set ns = namespace() %}
+
 {% set ns.totalReleases = 0 %}
 {% set ns.platPerRelease = 0 %}
 {% set ns.total_cols = 0 %}
 {% set ns.i = 0 %}
+{% set ns.alias = '' %}
 
 
 <div id="colSelectionSpan" style="visibility:hidden"></div>
@@ -258,7 +285,7 @@ height:0px;
 
 var data ={{rData}}
 
-var theadofhtml="<tr> <th colspan=1 style=text-align: right;></th> {% for keys1 in header|dictsort(reverse=true) %} 	{% set ns.totalReleases = ns.totalReleases + 1 %} 	{% set ns.platPerRelease = 0 %} {% for keys2 in header[keys1[0]]|dictsort %}  			{% set ns.platPerRelease = ns.platPerRelease +1  %}  	{% endfor %}  <th colspan={{ ns.platPerRelease }}> {{ keys1[0] }}  </th> {% endfor %} </tr>"
+var theadofhtml="<tr> <th colspan=1 style=text-align: right;></th> {% for keys1 in header|dictsort(reverse=true) %} 	{% set ns.totalReleases = ns.totalReleases + 1 %} 	{% set ns.platPerRelease = 0 %} {% for keys2 in header[keys1[0]]|dictsort %}  			{% set ns.platPerRelease = ns.platPerRelease +1  %}  	{% endfor %} {% set ns.alias = '' %} {% if keys1[0] == '9.0.4jS5' %}   {% set ns.alias = 'FPMR3'%} {% elif keys1[0] == '4.0.1e' %}   {% set ns.alias = 'HP'%} {% elif keys1[0] == '4.0.2dS10' %}   {% set ns.alias = 'HPMR1'%} {% elif keys1[0] == '4.0.3.98' %}   {% set ns.alias = 'HPMR3'%} {% elif keys1[0] == '3.1.3i' %}   {% set ns.alias = 'GPMR2' %} {% else %}   {% set ns.alias = 'unknown' %} {% endif %} <th colspan={{ ns.platPerRelease }}> {{ keys1[0] }} ({{ ns.alias}})   </th> {% endfor %} </tr>"
 var theadofhtml2="<tr> <th>Component</th> {% for keys1 in header|dictsort(reverse=true) %} 	{% set ns.totalReleases = ns.totalReleases + 1 %} 		{% set ns.platPerRelease = 0 %} 		{% for keys2 in header[keys1[0]]|dictsort %} 			{% set ns.platPerRelease = ns.platPerRelease +1  %} 			{% set ns.total_cols = ns.total_cols +1  %} 		<th>{{ keys2[0] }}</th>  	{% endfor %} {% endfor %} </tr>"
 var js_table_dummy_td=" {% for keys1 in header|dictsort(reverse=true) %} 	{% set ns.totalReleases = ns.totalReleases + 1 %} 		{% set ns.platPerRelease = 0 %} 		{% for keys2 in header[keys1[0]]|dictsort %} 			{% set ns.platPerRelease = ns.platPerRelease +1  %} 			{% set ns.total_cols = ns.total_cols +1  %} 		<td class=no-border-right no-border-left ></td>  	{% endfor %} {% endfor %} "
 console.log("theadofhtml "+theadofhtml)
@@ -357,7 +384,7 @@ $(document).ready(function() {
  console.log( JSON.stringify(nwComponents))
  
  
- js_table_html="<table id='example1'>"
+ js_table_html="<table id='example1' class=display pageResize>"
  js_table_html+="<thead>"
  js_table_html+=theadofhtml
  js_table_html+=theadofhtml2
@@ -447,9 +474,10 @@ $("#js_table").html(js_table_html)
 
 function showdatatable() {     
     var table = $('#example1').DataTable( {
-        scrollY:        "340px",
+         dom: 'Bfrtip',
+        scrollY:        "72vh",
         //scrollX:        true,
-        
+        pageResize: true,
         scrollX:        true,
         ScrollX: "100%", 
         ScrollCollapse: true,
@@ -459,33 +487,12 @@ function showdatatable() {
 
         fixedColumns:   {
             leftColumns: 1
-        }
-    } );
- }
-
- 
-    
-    
-    setTimeout(showdatatable, 2000)
-
- /*var table = $('#example').DataTable( {
-        scrollY:        "340px",
-        //scrollX:        true,
-        
-        scrollX:        true,
-        ScrollX: "100%", 
-        ScrollCollapse: true,
-        ScrollXInner: "400%", 
-        paging:         false,
-        "ordering": false,
-
-        fixedColumns:   {
-            leftColumns: 3
-        }
+        },
+         buttons: [
+           'excel'
+        ]
     } );
     
-    
-
     
     var columns = table.columns().header();
      
@@ -524,7 +531,7 @@ function showdatatable() {
     
     unique_columnsHtml ='Toggle column release: ';
     for ( colname in columns_names_unique){
-    unique_columnsHtml+= '<a class="toggle-vis" >'+columns_names_unique[colname]+'</a>'
+    unique_columnsHtml+= '<button class="toggle-vis" >'+columns_names_unique[colname]+'</button>'
     }
      $("#colSelectionSpan_unique").html(unique_columnsHtml)
     
@@ -538,8 +545,8 @@ function showdatatable() {
 
 
     
-     $('a.toggle-vis').on( 'click', function (e) {
-        e.preventDefault();
+     $('button.toggle-vis').on( 'click', function (e) {
+       // e.preventDefault();
          var that = this;
          var my = $(this);
         
@@ -568,7 +575,28 @@ table.columns.adjust().draw( false );
         $(this).addClass("hiddenCol")
         }
         
- } );*/
+ } );
+ }
+
+ 
+    
+    
+   
+    
+
+    
+
+  // $(document).ready(function() { updateDataTable('1px'); 
+    resizeTimer =  showdatatable(showdatatable, 2000);// });
+   
+   
+
+
+    
+    
+
+    
+    
 } );
 </script>
 </body>
