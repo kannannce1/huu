@@ -297,8 +297,13 @@ def generateHtmlCompatibleData(ctx):
 							if newL > 3:
 								row[(3-1):newL] = [''.join(row[(3-1):newL])]
 								htmlRow[0] = '$$@@'
-							elif newL < 3:
+							elif newL == 2:
 								htmlRow[0] = '$$@@'
+								row.append('parseError')        
+							elif newL == 1:
+								htmlRow[0] = '$$@@'
+								row.append('parseError')        
+								row.append('parseError')        
 							else:
 								pass
 					
@@ -316,16 +321,25 @@ def generateHtmlCompatibleData(ctx):
 							indexInHtmlReport = 0
 							rowInHtmlPresent =  False
 							for rowHtml in componentHTMLReport:
-								tempList = rowHtml[1:4]
-								if tempList == row:
+								irow = [row[0],row[2]]
+								irowHtml = [rowHtml[1],rowHtml[3]]
+								if irow == irowHtml:
 									rowInHtmlPresent = True
 									break
 								indexInHtmlReport += 1
 							
 							if rowInHtmlPresent:
-								componentHTMLReport[indexInHtmlReport][ii + 4] = 'Y'
+								yy = componentHTMLReport[indexInHtmlReport][ii + 4]
+
+								if yy != row[2] and yy != 'N':
+									logging.debug('row present %s ',componentHTMLReport[indexInHtmlReport][ii + 4])
+									assert False, 'same key:value pair expected, exiting'
+								else:
+									logging.debug('row present %s %s ',yy, componentHTMLReport[indexInHtmlReport][ii + 4])
+									componentHTMLReport[indexInHtmlReport][ii + 4] = row[2]
 							else:
-								htmlRow[ii + 4] = 'Y'
+								logging.debug('row absent adding now %s ', row)
+								htmlRow[ii + 4] = row[2]
 								componentHTMLReport.append(htmlRow)
 
 		ctx.newHTML[component] = componentHTMLReport
