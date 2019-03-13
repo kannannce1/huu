@@ -3,6 +3,7 @@ import sys
 import re
 import copy
 import logging
+import shlex
 
 from jinja2 import Template
 
@@ -108,7 +109,11 @@ def fetchComponents(ctx, lines):
 	componentName = ""
 	newState = ctx.current_state
 
-	z = re.search(r'^\s*(\b([A-Z-]+){1}\b)\s*$', line)
+	if ctx.isNewRelNoteFormat:
+		z = re.search(r"^\s*\'(([A-Z-]+){1})\'\s*$", line)
+	else:
+		z = re.search(r'^\s*(\b([A-Z-]+){1}\b)\s*$', line)
+
 	if z:
 		componentName = z.group(1)
 		ctx.myDict["Component"].append(componentName)
@@ -198,6 +203,7 @@ def end_fsm(ctx, lines):
 	ctx.myDict = {}
 	ctx.myDict["Component"] = []
 	ctx.current_lineNo = -1
+	ctx.isNewRelNoteFormat = True
 	newState = 'CLEANUP'
 	return (newState, lines)
 
@@ -210,6 +216,7 @@ def end_fsm_error(ctx, lines):
 	ctx.myDict = {}
 	ctx.myDict["Component"] = []
 	ctx.current_lineNo = -1
+	ctx.isNewRelNoteFormat = True
 	newState = 'CLEANUP'
 	return (newState, lines)
 
@@ -235,10 +242,15 @@ def processParsedData(ctx):
 		del ctx.myDict[component][0]
 		for n in range(L,R+1):
 			logging.debug('L=%s:,R=%s: n=%s:, line[n]=%s:',L,R,n,ctx.lines[n])
-			l = re.sub('\s{2,}|\t*(\s)+\t+','#@#@',ctx.lines[n].strip('')).split('#@#@')
-			if (len(l) != 3):
-#					print(l,len(l))
-				pass
+			if ctx.isNewRelNoteFormat:
+				l = shlex.split(ctx.lines[n])	 
+				if (len(l) != 3):
+					l = shlex.split(ctx.lines[n])	 
+					assert (False),'unexpected; NewRelNoteFormat !=3 columns'
+			else:
+				l = re.sub('\s{2,}|\t*(\s)+\t+','#@#@',ctx.lines[n].strip('')).split('#@#@')
+				if (len(l) != 3):
+					logging.debug("parsing error, found cols=%s line=%s ",len(l),l)
 			ctx.myDict[component].append(l)
 		ctx.myDict[component].sort()
 		
@@ -347,6 +359,7 @@ def generateHtmlCompatibleData(ctx):
 def generateHTML(ctx):
 	with open("report.html",'w') as w:
 		with open("template.html", 'r') as T:
+			logging.debug('Final HTML: %s', ctx.newHTML)
 			temp = T.read()
 			t = Template(temp)
 			w.write(t.render(rData=ctx.newHTML, header=ctx.finalData))
@@ -363,6 +376,7 @@ class ParsedContext:
 		self.lines = []
 		self.table_rows = {}
 		self.newHTML = {}
+		self.isNewRelNoteFormat = True
 
 def parseReleaseNotes(fileList):
 
@@ -388,10 +402,25 @@ def parseReleaseNotes(fileList):
 
 	for i in fileList:
 		with open(i, 'r') as f:
+			z = re.search(r'^\s*(CISCO)\s*$', f.read(), re.MULTILINE)
+			if z:
+				logging.debug("using old relNotes format parser")
+				ctx.isNewRelNoteFormat = False
+	    
+			f.seek(0,0)
+
+			z = re.search(r"^\s*'(CISCO)'\s*$", f.read(), re.MULTILINE)
+			if z:
+				logging.debug("using new relNotes format parser")
+				ctx.isNewRelNoteFormat = True
+
+			f.seek(0,0)
+
 			ctx.current_state = 'START'
 			m.set_start("START")
 			logging.info('Now Parsing: %s, from file=%s', i, ctx.current_lineNo)
 			ctx.lines = f.readlines()
+
 			ctx.lines =list(map(str.strip, ctx.lines))
 			ctx.lines = list(filter(lambda a: a != '', ctx.lines))
 			m.run(ctx, ctx.lines)
