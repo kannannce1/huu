@@ -568,7 +568,7 @@ function showdatatable() {
           
           notvalid_rows = true;
          for (item in row_data){
-            if ((item > 0) && (row_data[item].trim().replace(/\s/g,'') != "×")) {
+            if ((item > 0) && (row_data[item].trim().replace(/\s/g,'') != "X")) {
                 console.log(`item : ${item}  data : ${row_data[item]} 0 is ${row_data[0]}`)
                 notvalid_rows = false;
                 break;
