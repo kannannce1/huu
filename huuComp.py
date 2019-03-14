@@ -1,9 +1,10 @@
-#!/usr/bin/env python3 
+#!/usr/bin/env python3
 import sys
 import re
 import copy
 import logging
 import shlex
+import json
 
 from jinja2 import Template
 
@@ -35,7 +36,7 @@ class StateMachine:
 			(newState, fileData) = handler(ctx, fileData)
 			if newState.upper() in self.endStates:
 				logging.info("Moving into end state %s", newState)
-				break 
+				break
 			else:
 				ctx.current_lineNo += 1
 				logging.debug("Moving into %s", newState)
@@ -55,7 +56,7 @@ def fetchReleaseAndPlatform(ctx, lines):
 		line = 'null'
 		newState = "MISSING_REL_PLAT"
 		return (newState, lines)
-			
+
 	platform = ""
 	release  = ""
 
@@ -64,7 +65,7 @@ def fetchReleaseAndPlatform(ctx, lines):
 
 		platform = z.group(1)
 		release = z.group(2)
-		
+
 		if release != "":
 			if release in ctx.finalData.keys():
 				if platform != "":
@@ -83,7 +84,7 @@ def fetchReleaseAndPlatform(ctx, lines):
 				else:
 					logging.critical("Error fetching 'Platform'")
 					sys.exit()
-					
+
 		else:
 		   logging.CRITICAL("Error fetching 'Release'")
 		   sys.exit()
@@ -95,7 +96,7 @@ def fetchReleaseAndPlatform(ctx, lines):
 		newState = "FETCH_COMPONENTS"
 	else:
 		newState = "FETCH_REL_PLAT"
-	
+
 	return (newState, lines[1:])
 
 def fetchComponents(ctx, lines):
@@ -119,14 +120,14 @@ def fetchComponents(ctx, lines):
 		ctx.myDict["Component"].append(componentName)
 		ctx.myDict[componentName] = []
 		ctx.myDict[componentName].append(ctx.current_lineNo)
-	
+
 		if componentName != "":
 			logging.info("COMPONENT: %s", componentName)
 		else:
 			assert (False),'Component Name absent'
 		newState = 'FETCH_COMPONENTS_DATA'
 		return (newState, lines[1:])
-	
+
 	if newState == 'FETCH_COMPONENTS_DATA':
 			z = re.search(r'(^[\s]*[-]+[\s]*$)|(^[\s]*$|^HDD)', line)
 			if z:
@@ -187,7 +188,7 @@ def addDummyMarkerAfterHdd(ctx, lines):
 	componentName = "DUMMY2"
 	ctx.myDict["Component"].append(componentName)
 	ctx.myDict[componentName] = []
-	ctx.myDict[componentName].append(ctx.current_lineNo) 
+	ctx.myDict[componentName].append(ctx.current_lineNo)
 	newState = 'END'
 
 	return (newState, lines[1:])
@@ -223,7 +224,9 @@ def end_fsm_error(ctx, lines):
 def cleanUp(ctx, lines):
 	pass
 
-def splitOnErr(str1):
+def splitOnErr(str1,c):
+
+	str1 = str1.strip()
 	str2 = " "
 	l = ['','','']
 	l[2] = str1[str1.rfind(str2)+1:]
@@ -232,15 +235,26 @@ def splitOnErr(str1):
 	while str1[index] == ' ':
 		index = index -1
 
-	l[1] = str1[str1.rfind(str2, 0, index)+1: index+1]
+	if c == 'HDD':
 
-	index = str1.rfind(str2, 0, index)
+		l[1] = str1[str1.rfind(str2, 0, index)+1: index+1]
 
-	while str1[index] == ' ':
-		index = index -1
-  
-	l[0] = str1[:index+1]
-	
+		index = str1.rfind(str2, 0, index)
+
+		while str1[index] == ' ':
+			index = index -1
+
+		l[0] = str1[:index+1]
+
+	else:
+
+		l[0] = str1[:str1.find(str2)]
+		indexL = str1.find(str2)
+
+		t = str1[indexL:index]
+		t = t.strip()
+		l[1] = t
+
 	return l
 
 def processParsedData(ctx):
@@ -261,20 +275,23 @@ def processParsedData(ctx):
 		R = ctx.myDict[ctx.myDict["Component"][ctx.myDict["Component"].index(component)+1]][0] - 1
 		del ctx.myDict[component][0]
 		for n in range(L,R+1):
+			l = []
 			logging.debug('L=%s:,R=%s: n=%s:, line[n]=%s:',L,R,n,ctx.lines[n])
 			if ctx.isNewRelNoteFormat:
 				try:
-					l = shlex.split(ctx.lines[n])	 
+					l = shlex.split(ctx.lines[n])
 					if (len(l) != 3):
 						assert (False),'unexpected; NewRelNoteFormat !=3 columns'
 				except ValueError:
-					logging.debug("ValueError: No closing quotation")
+					logging.debug("ValueError: No closing quotation cols=%s line=%s", len(l), l)
+					l = splitOnErr(ctx.lines[n],component)
+					logging.debug("shlex parsing error, after splitOnErr cols=%s line=%s ",len(l),l)
 			else:
 				l = re.sub('\s{2,}|\t*(\s)+\t+','#@#@',ctx.lines[n].strip('')).split('#@#@')
 				if (len(l) != 3):
-					logging.debug("parsing error, found cols=%s line=%s, using splitOnErr ",len(l),l)
-					l = splitOnErr(ctx.lines[n])
-					logging.debug("parsing error, after splitOnErr cols=%s line=%s ",len(l),l)
+					logging.debug("parsing error, found in component=%s cols=%s line=%s, using splitOnErr ",component,len(l),l)
+					l = splitOnErr(ctx.lines[n],component)
+					logging.debug("parsing error, after splitOnErr in component=%s cols=%s line=%s ",component,len(l),l)
 			'''
 			swap column 0 & 1 if the component is HDD
 			to maintain the uniformity of table format
@@ -283,11 +300,11 @@ def processParsedData(ctx):
 				temp = l[1]
 				l[1] = l[0]
 				l[0] = temp
-	
+
 			ctx.myDict[component].append(l)
 
 		ctx.myDict[component].sort()
-		
+
 		if component in ctx.table_rows.keys():
 			for elem in ctx.myDict[component]:
 				if elem in ctx.table_rows[component]:
@@ -296,9 +313,9 @@ def processParsedData(ctx):
 					ctx.table_rows[component].append(elem)
 			ctx.table_rows[component].sort(key=lambda x: x[0])
 		else:
-			ctx.table_rows[component] = ctx.myDict[component] 
+			ctx.table_rows[component] = ctx.myDict[component]
 			ctx.table_rows[component].sort(key=lambda x: x[0])
-		
+
 	ctx.myDict["Component"].remove("DUMMY1")
 	ctx.myDict["Component"].remove("DUMMY2")
 	del ctx.myDict["DUMMY1"]
@@ -335,29 +352,29 @@ def generateHtmlCompatibleData(ctx):
 				ii += 1
 				if component in ctx.finalData[release][platform].keys():
 					for row in ctx.table_rows[component]:
-							
+
 						if row in ctx.finalData[release][platform][component]:
 							htmlRow = ['N'] * totalColumns
-							
+
 							newL = len(row)
 							if newL > 3:
 								row[(3-1):newL] = [''.join(row[(3-1):newL])]
 								htmlRow[0] = '$$@@'
 							elif newL == 2:
 								htmlRow[0] = '$$@@'
-								row.append('parseError')        
+								row.append('parseError')
 							elif newL == 1:
 								htmlRow[0] = '$$@@'
-								row.append('parseError')        
-								row.append('parseError')        
+								row.append('parseError')
+								row.append('parseError')
 							else:
 								pass
-					
+
 							i = 1
 
 							for elem in row:
 								htmlRow[i] = elem
-								i += 1	
+								i += 1
 								print('CHECKING ROW', row)
 							'''
 							check if 'row' is present in htmlReport
@@ -373,7 +390,7 @@ def generateHtmlCompatibleData(ctx):
 									rowInHtmlPresent = True
 									break
 								indexInHtmlReport += 1
-							
+
 							if rowInHtmlPresent:
 								yy = componentHTMLReport[indexInHtmlReport][ii + 4]
 
@@ -394,6 +411,10 @@ def generateHTML(ctx):
 	with open("report.html",'w') as w:
 		with open("template.html", 'r') as T:
 			logging.debug('Final HTML: %s', ctx.newHTML)
+
+			with open("html.json", 'w') as J:
+				jsonData = json.dumps(ctx.newHTML)
+				J.write(jsonData)
 			temp = T.read()
 			t = Template(temp)
 			w.write(t.render(rData=ctx.newHTML, header=ctx.finalData))
@@ -415,7 +436,7 @@ class ParsedContext:
 def parseReleaseNotes(fileList):
 
 	logging.basicConfig(filename='oneview.log', filemode='w', format='%(levelname)s - %(message)s', level=logging.DEBUG)
-	
+
 	m = StateMachine()
 
 	m.add_state("START", startFSM)
@@ -424,10 +445,10 @@ def parseReleaseNotes(fileList):
 	m.add_state("FETCH_COMPONENTS_DATA", fetchComponents)
 	m.add_state("FETCH_HDD_COMPONENT", fetchHddComponent)
 	m.add_state("FETCH_HDD_COMPONENT_DATA", fetchHddComponent)
-	m.add_state("MISSING_REL_PLAT", end_fsm_error)	
-	m.add_state("DUPLICATE_REL_PLAT", end_fsm_error)	
-	m.add_state("MISSING_COMPONENTS", end_fsm_error)	
-	m.add_state("MISSING_HDD_COMPONENT", end_fsm_error)	
+	m.add_state("MISSING_REL_PLAT", end_fsm_error)
+	m.add_state("DUPLICATE_REL_PLAT", end_fsm_error)
+	m.add_state("MISSING_COMPONENTS", end_fsm_error)
+	m.add_state("MISSING_HDD_COMPONENT", end_fsm_error)
 	m.add_state("EOF_IN_FETCH_HDD_COMPONENT", addDummyMarkerAfterHdd)
 	m.add_state("END", end_fsm)
 	m.add_state("CLEANUP", None, end_state=1)
@@ -440,7 +461,7 @@ def parseReleaseNotes(fileList):
 			if z:
 				logging.debug("using old relNotes format parser")
 				ctx.isNewRelNoteFormat = False
-	    
+
 			f.seek(0,0)
 
 			z = re.search(r"^\s*'(CISCO)'\s*$", f.read(), re.MULTILINE)
@@ -462,10 +483,10 @@ def parseReleaseNotes(fileList):
 	logging.info('MERGED data: %s', ctx.finalData)
 	generateHtmlCompatibleData(ctx)
 	generateHTML(ctx)
- 
+
 def main():
 	#generateComparisonReport(sys.argv[1:])
 	parseReleaseNotes(sys.argv[1:])
 
 if __name__ == '__main__':
-  main()
+	main()
