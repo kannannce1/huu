@@ -278,7 +278,7 @@ $(document).ready(function() {
            
             ////console.log(component+" release : "+data[component][release])
             
-             if (component != "HDD") {
+            
             
             if (data[component][release][1] in nwComponents[component]){
                 ////console.log(i+" Lets try ++"+data[component][release][1])
@@ -341,81 +341,13 @@ $(document).ready(function() {
                 i=2
             }
             
-             } else {
              
-             
-             
-             
-               if (data[component][release][2] in nwComponents[component]){
-                ////console.log(i+" Lets try ++"+data[component][release][1])
-                
-              //  nwComponents[component][data[component][release][1]+"_count"]=i;
-                
-                for (comp_applicable in data[component][release]) {
-                    if (comp_applicable > 3) {
-                    ////console.log("comp_applicable "+data[component][release][comp_applicable])
-                        if (data[component][release][comp_applicable] == "Y") {
-                        
-                                
-                        
-                           
-                            //console.log("just testing")
-                            nwComponents[component][data[component][release][2]][0][comp_applicable]=data[component][release][3]
-                           
-                        
-                        }
-                 
-                        
-                    }
-                }
-                
-             i++   
-                //break;
-            }else {
-                i=1;
-                //console.log("Lets try "+i+" "+data[component][release][1])
-               // nwComponents[component][data[component][release][1]+"_count"]=i;
-                nwComponents[component][data[component][release][2]] = []
-                nwComponents[component][data[component][release][2]].push(data[component][release])
-                for (comp_applicable in data[component][release]) {
-                 //console.log("comp_applicable "+data[component][release][comp_applicable])
-                 index=3
-                 if (comp_applicable > 3) {
-                        if (data[component][release][comp_applicable] == "Y") {
-                        
-                                
-                        
-                           
-                           // //console.log("just testing 2")
-                           //console.log( "just testing 2" +nwComponents[component][data[component][release][1]]+ " "+comp_applicable)
-                            //console.log( "just testing 2" +nwComponents[component][data[component][release][1]][0])
-                            //var index = items.indexOf(3452);
-
-                            //if (index !== -1) {
-                                //items[index] = 1010;
-                                 nwComponents[component][data[component][release][2]][0][comp_applicable]=data[component][release][3]
-                            //}
-                           
-                           
-                        
-                        } 
-                 
-                 }   
-                 index++;
-                }
-                //i++
-                i=2
-            }
-             
-             
-             
-             }
             
          }
      }
  
  }
- //console.log("final components")
+ console.log("final components")
  console.log( JSON.stringify(nwComponents))
  
  
@@ -459,38 +391,24 @@ $(document).ready(function() {
             for (i in nwComponents[com][items][item]) {
             
             if (i==0){
-                if (com == "HDD") {
-                
-                    if(nwComponents[com][items][item][0] != "N") {
-           
-                        js_table_html+="<td >"+nwComponents[com][items][item][2]+"  <span class=red>*</span>  <span style=opacity:0;width:0px;height:0px;display: block;>"+com+"</span></td>"
-                    } else {
-                        js_table_html+="<td >"+nwComponents[com][items][item][2]+"  <span style=opacity:0;width:0px;height:0px;display: block;>"+com+"</span></td>"
-                    }
-   
-                }
-                 if (com != "HDD") {
+               
                  
-                     if(nwComponents[com][items][item][0] != "N") {
-           
-                        js_table_html+="<td  >"+items+" <span class=red>*</span> <span style=opacity:0;width:0px;height:0px;display: block;>"+com+"</span></td>"
-                        } else {
-                        js_table_html+="<td >"+items+"   <span style=opacity:0;width:0px;height:0px;display: block;>"+com+"</span></td>"
+                 
+              
+                        js_table_html+="<td >"+items+"   <span style=opacity:0;width:0px;height:0px;display: block;>"+com+"123</span></td>"
                      }
    
-                }
-            }
-    
+                
+            
+                
                 if (i>3) {
                     if (nwComponents[com][items][item][i] =="N"){
                     js_table_html+="<td id=marker class=no>&times</td>"
                     
                     } else {
-                        if (com != "HDD") {
+                      
                             js_table_html+="<td title='"+nwComponents[com][items][item][2]+"'  data-toggle='tooltip' >"+nwComponents[com][items][item][i]+" </td>"
-                        } else {
-                             js_table_html+="<td title='"+nwComponents[com][items][item][1]+"'  data-toggle='tooltip' >"+nwComponents[com][items][item][i]+" </td>"
-                        }
+                        
                     }
                 }
             }
@@ -673,56 +591,7 @@ function showdatatable() {
   
    })
    
-  // for (item in data){
-  // console.log(`data : ${value} and index : ${index}`)
-  // }
-     
-  /*  data.each(function (value, index) {
-    console.log(`data : ${value} and index : ${index}`)
-    notvalid_rows = true;
-        for (val in value){
-            if (val > 0 && value[val]!="×" ){
-                notvalid_rows=false;
-                console.log(`${val} breake is ${value} `);
-                break;
-            }
-        }
-        if (notvalid_rows){
-            notvalid_rows_count++
-            console.log(`notvalid_rows value is ${value[val]} `);
-           
-        }
-
-    
-    
-} );*/
-         
-
-/* $(rowNode).find("td:visible").each(function (value, index) {
-
-     console.log(`For index ${index}, data value is ${value} and type of value is ${typeof(value)}`);
-     
-     notvalid_rows = true;
-     for (val in value){
-        console.log(`${val} value is ${value[val]} `);
-        
-       
-        if (val > 0 && value[val]!="×"){
-            notvalid_rows=false;
-            console.log(`${val} breake is ${value[val]} `);
-            break;
-        }
-        
-        
-     }
-     if (notvalid_rows){
-        notvalid_rows_count++
-            console.log(`notvalid_rows value is ${value[val]} `);
-        }
-    
-
-     
- });*/
+  
          
          }else {
         
