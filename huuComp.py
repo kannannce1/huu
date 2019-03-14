@@ -243,15 +243,27 @@ def processParsedData(ctx):
 		for n in range(L,R+1):
 			logging.debug('L=%s:,R=%s: n=%s:, line[n]=%s:',L,R,n,ctx.lines[n])
 			if ctx.isNewRelNoteFormat:
-				l = shlex.split(ctx.lines[n])	 
-				if (len(l) != 3):
+				try:
 					l = shlex.split(ctx.lines[n])	 
-					assert (False),'unexpected; NewRelNoteFormat !=3 columns'
+					if (len(l) != 3):
+						assert (False),'unexpected; NewRelNoteFormat !=3 columns'
+				except ValueError:
+					logging.debug("ValueError: No closing quotation")
 			else:
 				l = re.sub('\s{2,}|\t*(\s)+\t+','#@#@',ctx.lines[n].strip('')).split('#@#@')
 				if (len(l) != 3):
 					logging.debug("parsing error, found cols=%s line=%s ",len(l),l)
+			'''
+			swap column 0 & 1 if the component is HDD
+			to maintain the uniformity of table format
+			'''
+			if component == "HDD":
+				temp = l[1]
+				l[1] = l[0]
+				l[0] = temp
+	
 			ctx.myDict[component].append(l)
+
 		ctx.myDict[component].sort()
 		
 		if component in ctx.table_rows.keys():
