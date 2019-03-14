@@ -251,10 +251,11 @@ def splitOnErr(str1,c):
 		l[0] = str1[:str1.find(str2)]
 		indexL = str1.find(str2)
 
-		t = str1[indexL:index]
+		t = str1[indexL:index+1]
 		t = t.strip()
 		l[1] = t
 
+	l = [e.strip("'") for e in l]
 	return l
 
 def processParsedData(ctx):
@@ -286,6 +287,9 @@ def processParsedData(ctx):
 					logging.debug("ValueError: No closing quotation cols=%s line=%s", len(l), l)
 					l = splitOnErr(ctx.lines[n],component)
 					logging.debug("shlex parsing error, after splitOnErr cols=%s line=%s ",len(l),l)
+					if ((l[0] == l[2]) and (l[1] == '')):
+						logging.critical('FILE contain INVALID lines')
+						continue
 			else:
 				l = re.sub('\s{2,}|\t*(\s)+\t+','#@#@',ctx.lines[n].strip('')).split('#@#@')
 				if (len(l) != 3):
