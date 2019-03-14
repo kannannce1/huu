@@ -223,6 +223,26 @@ def end_fsm_error(ctx, lines):
 def cleanUp(ctx, lines):
 	pass
 
+def splitOnErr(str1):
+	str2 = " "
+	l = ['','','']
+	l[2] = str1[str1.rfind(str2)+1:]
+	index = str1.rfind(str2)
+
+	while str1[index] == ' ':
+		index = index -1
+
+	l[1] = str1[str1.rfind(str2, 0, index)+1: index+1]
+
+	index = str1.rfind(str2, 0, index)
+
+	while str1[index] == ' ':
+		index = index -1
+  
+	l[0] = str1[:index+1]
+	
+	return l
+
 def processParsedData(ctx):
 	'''
 	1. Take one by one the Components C1
@@ -252,7 +272,9 @@ def processParsedData(ctx):
 			else:
 				l = re.sub('\s{2,}|\t*(\s)+\t+','#@#@',ctx.lines[n].strip('')).split('#@#@')
 				if (len(l) != 3):
-					logging.debug("parsing error, found cols=%s line=%s ",len(l),l)
+					logging.debug("parsing error, found cols=%s line=%s, using splitOnErr ",len(l),l)
+					l = splitOnErr(ctx.lines[n])
+					logging.debug("parsing error, after splitOnErr cols=%s line=%s ",len(l),l)
 			'''
 			swap column 0 & 1 if the component is HDD
 			to maintain the uniformity of table format
