@@ -452,7 +452,7 @@ def parseReleaseNotes(fileList):
 	m.add_state("MISSING_REL_PLAT", end_fsm_error)
 	m.add_state("DUPLICATE_REL_PLAT", end_fsm_error)
 	m.add_state("MISSING_COMPONENTS", end_fsm_error)
-	m.add_state("MISSING_HDD_COMPONENT", end_fsm_error)
+	m.add_state("MISSING_HDD_COMPONENT", end_fsm)
 	m.add_state("EOF_IN_FETCH_HDD_COMPONENT", addDummyMarkerAfterHdd)
 	m.add_state("END", end_fsm)
 	m.add_state("CLEANUP", None, end_state=1)
