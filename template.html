@@ -1,703 +1,654 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8"> 
-<style type="text/css">
-
-body {
-    font-family: 'CiscoSansTT-Thin',sans-serif;
-    height: 100%;
-    font-size: .8em;
-}
-
-.table-fixed {
-	background-color: #f3f3f3;
-}
-
-.table-fixed {
-	border-collapse: collapse;
-}
-
-td {
-	border: .2px solid black;
-	text-align: left;
-	padding: 15px;
-}
-
-th {
-	border: 1px solid black;
-	text-align: left;
-	padding: 15px;
-	bgcolor="#004BAF";
-	color=white;
-    font-size: 120%;
-}
-
-#marker {
-	text-align:center;
-	
-}
-
-.header {
-    background-color: #004BAF;
-}
-
-h1  {
-    margin:0;
-    padding: 10px;
-    font-family: 'CiscoSansTT-Thin',sans-serif;
-    font-size: 1.7em;
-    color: #ffffff;
-    font-weight: normal;
-}
-
-.dataTables_filter {
-   /* margin: -5.5em 0 10px 0;*/
-    
-    position: fixed;
-    top: 0;
-    right: 0;
-    margin: 1.2em;
-}
-
-.dataTables_filter label{
-    color:white;
-}
-
-table.dataTable.stripe tbody tr.odd, table.dataTable.display tbody tr.odd {
-    background-color: #E8EBF1 !important;
-}
-
-.example{
-    font-size: .8em;
-}
-
-.no {
-color:red;
-font-size:1.38em;
-}
-
-.yes    {
-    color:green;
-    font-size:1.38em;
-}
-
-.no-border-right {
-    border-right:none;
-   
-}
-.no-border-left {
-    border-left: none;
-    
-}
-
-table.dataTable thead th, table.dataTable thead td {
-    background-color:#C4D6ED !important;
-}
-
-
-
-
-
-a {
-    cursor: pointer;
-    color: #3174c7;
-    text-decoration: none;
-}
-
-#columnIds {
-    margin-top: 10px;
-}
-
-.red {
-    color:red;
-}
-
-
-#colSelectionSpan > a.toggle-vis.hiddenCol , #colSelectionSpan_unique> a.toggle-vis.hiddenCol {
-    color: #fd4141;
-    border-color: #fd4141;
-}
-
-#colSelectionSpan > button.toggle-vis.hiddenCol , #colSelectionSpan_unique> button.toggle-vis.hiddenCol {
-    color: #fd4141;
-    border-color: #fd4141;
-}
-#colSelectionSpan > a , #colSelectionSpan_unique > a{
-
-    height: 0px;
-    width: 0px;
-    display: block;
-    overflow: hidden;
-}
-
-.DTFC_LeftBodyLiner {
-    overflow-y: hidden !important;
-}
-
-#colSelectionSpan {
-width:0px;
-height:0px;
-
-}
-
-
-table.dataTable thead tr:first-child th {
-
-   background-color: #E8EBF1 !important
-}
-
-.toggle-vis{
-margin: 0 5px
-}
-
-
-.app-icon-excel {
-    width: 16px;
-    height: 16px;
-    /* background: url(images/HCL-sprite.png); */
-    background-position: 62px -25px;
-}
-
-
-.dataTables_wrapper .dataTables_filter input {
-    margin-left: 0.5em;
-    width: 20em;
-    height: 2em;
-}
-.component_title {
-font-weight: bold; 
-background-color :#008CCC !important;
-}
-
-#colSelectionSpan_unique button {
-font-weight:bold;
-}
-
-#colSelectionSpan_unique{
-margin: 2px 0 0 0;
-font-weight: bold;
-}
-
-.dataTables_wrapper .dataTables_info {
-      font-weight: bold;
-}
-
-.dataTables_wrapper .dataTables_scroll div.dataTables_scrollBody>table>thead>tr>th, .dataTables_wrapper .dataTables_scroll div.dataTables_scrollBody>table>thead>tr>td, .dataTables_wrapper .dataTables_scroll div.dataTables_scrollBody>table>tbody>tr>th, .dataTables_wrapper .dataTables_scroll div.dataTables_scrollBody>table>tbody>tr>td {
-    vertical-align: middle;
-    text-align: center;
-}
-
-col:nth-child(2n+2) {background: #CCC}
-
-td.highlight {
-    background-color: wheat;
-}
-
-    
-</style>
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/fixedcolumns/3.2.6/css/fixedColumns.dataTables.min.css">
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.5.4/css/buttons.dataTables.min.css">
-
-
-<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
-<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/fixedcolumns/3.2.6/js/dataTables.fixedColumns.min.js"></script>
-<script src="https://cdn.datatables.net/plug-ins/1.10.19/features/pageResize/dataTables.pageResize.min.js"></script>
-
-
-<script src="https://cdn.datatables.net/buttons/1.5.4/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/1.5.4/js/buttons.flash.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
-<script src="https://cdn.datatables.net/buttons/1.5.4/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/1.5.4/js/buttons.print.min.js"></script>
-
-
+    <meta charset="UTF-8">
+    <style type="text/css">
+        body {
+            font-family: 'CiscoSansTT-Thin', sans-serif;
+            height: 100%;
+            font-size: .8em;
+        }
+        .table-fixed {
+            background-color: #f3f3f3;
+        }
+        .table-fixed {
+            border-collapse: collapse;
+        }
+        td {
+            border: .2px solid black;
+            text-align: left;
+            padding: 15px;
+        }
+        th {
+            border: 1px solid black;
+            text-align: left;
+            padding: 15px;
+            bgcolor="#004BAF";
+            color=white;
+            font-size: 120%;
+        }
+        #marker {
+            text-align: center;
+        }
+        .header {
+            background-color: #004BAF;
+        }
+        h1 {
+            margin: 0;
+            padding: 10px;
+            font-family: 'CiscoSansTT-Thin', sans-serif;
+            font-size: 1.7em;
+            color: #ffffff;
+            font-weight: normal;
+        }
+        .dataTables_filter {
+            /* margin: -5.5em 0 10px 0;*/
+            position: fixed;
+            top: 0;
+            right: 0;
+            margin: 1.2em;
+        }
+        .dataTables_filter label {
+            color: white;
+        }
+        table.dataTable.stripe tbody tr.odd,
+        table.dataTable.display tbody tr.odd {
+            background-color: #E8EBF1 !important;
+        }
+        .example {
+            font-size: .8em;
+        }
+        .no {
+            color: red;
+            font-size: 1.38em;
+        }
+        .yes {
+            color: green;
+            font-size: 1.38em;
+        }
+        .no-border-right {
+            border-right: none;
+        }
+        .no-border-left {
+            border-left: none;
+        }
+        table.dataTable thead th,
+        table.dataTable thead td {
+            background-color: #C4D6ED !important;
+        }
+        a {
+            cursor: pointer;
+            color: #3174c7;
+            text-decoration: none;
+        }
+        #columnIds {
+            margin-top: 10px;
+        }
+        .red {
+            color: red;
+        }
+        #colSelectionSpan>a.toggle-vis.hiddenCol,
+        #colSelectionSpan_unique>a.toggle-vis.hiddenCol {
+            color: #fd4141;
+            border-color: #fd4141;
+        }
+        #colSelectionSpan>button.toggle-vis.hiddenCol,
+        #colSelectionSpan_unique>button.toggle-vis.hiddenCol {
+            color: #fd4141;
+            border-color: #fd4141;
+        }
+        #colSelectionSpan>a,
+        #colSelectionSpan_unique>a {
+            height: 0px;
+            width: 0px;
+            display: block;
+            overflow: hidden;
+        }
+        .DTFC_LeftBodyLiner {
+            overflow-y: hidden !important;
+        }
+        #colSelectionSpan {
+            width: 0px;
+            height: 0px;
+        }
+        table.dataTable thead tr:first-child th {
+            background-color: #E8EBF1 !important
+        }
+        .toggle-vis {
+            margin: 0 5px
+        }
+        .app-icon-excel {
+            width: 16px;
+            height: 16px;
+            /* background: url(images/HCL-sprite.png); */
+            background-position: 62px -25px;
+        }
+        .dataTables_wrapper .dataTables_filter input {
+            margin-left: 0.5em;
+            width: 20em;
+            height: 2em;
+        }
+        .component_title {
+            font-weight: bold;
+            background-color: #008CCC !important;
+        }
+        #colSelectionSpan_unique button {
+            font-weight: bold;
+        }
+        #colSelectionSpan_unique {
+            margin: 2px 0 0 0;
+            font-weight: bold;
+        }
+        .dataTables_wrapper .dataTables_info {
+            font-weight: bold;
+        }
+        col:nth-child(2n+2) {
+            background: #CCC
+        }
+        td.highlight {
+            background-color: wheat;
+        }
+        .loader {
+            border: 16px solid #f3f3f3;
+            /* Light grey */
+            border-top: 16px solid #3498db;
+            /* Blue */
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            animation: spin 2s linear infinite;
+            position: absolute;
+            top: 50%;
+            z-index: 1000;
+            left: 42%;
+            display: none;
+        }
+        @keyframes loadingoverlay_animation__rotate_right {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        .loadingoverlay {
+            box-sizing: border-box;
+            position: fixed;
+            display: flex;
+            flex-flow: column nowrap;
+            align-items: center;
+            justify-content: space-around;
+            background: rgba(255, 255, 255, 0.8);
+            top: 0px;
+            left: 0px;
+            width: 100%;
+            height: 100%;
+            z-index: 2147483647;
+            opacity: 1;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/fixedcolumns/3.2.6/css/fixedColumns.dataTables.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.5.4/css/buttons.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/fixedcolumns/3.2.6/js/dataTables.fixedColumns.min.js"></script>
+    <script src="https://cdn.datatables.net/plug-ins/1.10.19/features/pageResize/dataTables.pageResize.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.4/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.4/js/buttons.flash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.4/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.4/js/buttons.print.min.js"></script>
+    <!--<script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.6/dist/loadingoverlay.min.js" ></script> -->
 </head>
-
 <body>
-<div class="header">
-<h1>UCS C-Series Rack-Mount Standalone Server HUU Component Comparison</h1>
-</div>
-
-
-
-{% set ns = namespace() %}
-
-{% set ns.totalReleases = 0 %}
-{% set ns.platPerRelease = 0 %}
-{% set ns.total_cols = 0 %}
-{% set ns.i = 0 %}
-{% set ns.alias = '' %}
-
-
-<div id="colSelectionSpan" style="visibility:hidden"></div>
-<div id="colSelectionSpan_unique"></div>
-
-
-
-
-
-<div id="js_table"></div>
-
-
-<script>
-
-var data ={{rData}}
-var colgroup=""
-var colgroup = "<colgroup>  <col span=1 >  {% for keys1 in header|dictsort(reverse=true) %} 	{% set ns.totalReleases = ns.totalReleases + 1 %} 	{% set ns.platPerRelease = 0 %} {% for keys2 in header[keys1[0]]|dictsort %}  			{% set ns.platPerRelease = ns.platPerRelease +1  %}  	{% endfor %} {% set ns.alias = '' %} {% if keys1[0] == '9.0.4jS5' %}   {% set ns.alias = 'FPMR3'%} {% elif keys1[0] == '4.0.1e' %}   {% set ns.alias = 'HP'%} {% elif keys1[0] == '4.0.2dS10' %}   {% set ns.alias = 'HPMR1'%} {% elif keys1[0] == '4.0.3.98' %}   {% set ns.alias = 'HPMR3'%} {% elif keys1[0] == '3.1.3i' %}   {% set ns.alias = 'GPMR2' %} {% else %}   {% set ns.alias = 'unknown' %} {% endif %} <col  span={{ ns.platPerRelease }} >    {% endfor %} </colgroup>"
-var theadofhtml="<tr> <th colspan=1 style=text-align: right;></th> {% for keys1 in header|dictsort(reverse=true) %} 	{% set ns.totalReleases = ns.totalReleases + 1 %} 	{% set ns.platPerRelease = 0 %} {% for keys2 in header[keys1[0]]|dictsort %}  			{% set ns.platPerRelease = ns.platPerRelease +1  %}  	{% endfor %} {% set ns.alias = '' %} {% if keys1[0] == '9.0.4jS5' %}   {% set ns.alias = 'FPMR3'%} {% elif keys1[0] == '4.0.1e' %}   {% set ns.alias = 'HP'%} {% elif keys1[0] == '4.0.2dS10' %}   {% set ns.alias = 'HPMR1'%} {% elif keys1[0] == '4.0.3.98' %}   {% set ns.alias = 'HPMR3'%} {% elif keys1[0] == '3.1.3i' %}   {% set ns.alias = 'GPMR2' %} {% else %}   {% set ns.alias = 'unknown' %} {% endif %} <th colspan={{ ns.platPerRelease }}> {{ keys1[0] }} ({{ ns.alias}})   </th> {% endfor %} </tr>"
-var theadofhtml2="<tr> <th>Component</th> {% for keys1 in header|dictsort(reverse=true) %} 	{% set ns.totalReleases = ns.totalReleases + 1 %} 		{% set ns.platPerRelease = 0 %} 		{% for keys2 in header[keys1[0]]|dictsort %} 			{% set ns.platPerRelease = ns.platPerRelease +1  %} 			{% set ns.total_cols = ns.total_cols +1  %} 		<th>{{ keys2[0] }}</th>  	{% endfor %} {% endfor %} </tr>"
-var js_table_dummy_td=" {% for keys1 in header|dictsort(reverse=true) %} 	{% set ns.totalReleases = ns.totalReleases + 1 %} 		{% set ns.platPerRelease = 0 %} 		{% for keys2 in header[keys1[0]]|dictsort %} 			{% set ns.platPerRelease = ns.platPerRelease +1  %} 			{% set ns.total_cols = ns.total_cols +1  %} 		<td class='no-border-right no-border-left component_title' ></td>  	{% endfor %} {% endfor %} "
-
-
-
-$(document).ready(function() {
-    
-    
-    
-     nwComponents = {}
- 
- for (component in data){
-   
-     
-     
-     ////console.log("Lets try  : "+ typeof(data[component]))
-    // //console.log("Lets try  : "+data[component].length);
-     nwComponents[component] ={}
-     if (data[component]) {
-        
-        
-        i=1;
-        //data[component] 
-       // //console.log("sorted :"+data[component].sort())
-         for (release in  data[component].sort()) {
-           
-            ////console.log(component+" release : "+data[component][release])
-            
-            
-            
-            if (data[component][release][1] in nwComponents[component]){
-                ////console.log(i+" Lets try ++"+data[component][release][1])
-                
-              //  nwComponents[component][data[component][release][1]+"_count"]=i;
-                
-                for (comp_applicable in data[component][release]) {
-                    if (comp_applicable > 3) {
-                    ////console.log("comp_applicable "+data[component][release][comp_applicable])
-                        if (data[component][release][comp_applicable] == "Y") {
-                        
-                                
-                        
-                           
-                            //console.log("just testing")
-                            nwComponents[component][data[component][release][1]][0][comp_applicable]=data[component][release][3]
-                           
-                        
+    <div class="loader"></div>
+    <div class="loadingoverlay" id="loadingoverlay">
+        <div class="loadingoverlay_element"
+            style="order: 1; box-sizing: border-box; overflow: visible; flex: 0 0 auto; display: flex; justify-content: center; align-items: center; animation-name: loadingoverlay_animation__rotate_right; animation-duration: 2000ms; animation-timing-function: linear; animation-iteration-count: infinite; width: 120px; height: 120px;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"
+                style="width: 100%; height: 100%; fill: rgb(32, 32, 32);">
+                <circle r="80" cx="500" cy="90" style="fill: rgb(32, 32, 32);"></circle>
+                <circle r="80" cx="500" cy="910" style="fill: rgb(32, 32, 32);"></circle>
+                <circle r="80" cx="90" cy="500" style="fill: rgb(32, 32, 32);"></circle>
+                <circle r="80" cx="910" cy="500" style="fill: rgb(32, 32, 32);"></circle>
+                <circle r="80" cx="212" cy="212" style="fill: rgb(32, 32, 32);"></circle>
+                <circle r="80" cx="788" cy="212" style="fill: rgb(32, 32, 32);"></circle>
+                <circle r="80" cx="212" cy="788" style="fill: rgb(32, 32, 32);"></circle>
+                <circle r="80" cx="788" cy="788" style="fill: rgb(32, 32, 32);"></circle>
+            </svg>
+        </div>
+    </div>
+    <div class="header">
+        <h1>UCS C-Series Rack-Mount Standalone Server HUU Component Comparison</h1>
+    </div>
+    {% set ns = namespace() %}
+    {% set ns.totalReleases = 0 %}
+    {% set ns.platPerRelease = 0 %}
+    {% set ns.total_cols = 0 %}
+    {% set ns.i = 0 %}
+    {% set ns.alias = '' %}
+    <div id="colSelectionSpan" style="visibility:hidden"></div>
+    <div id="colSelectionSpan_unique"></div>
+    <div id="js_table"></div>
+    <script>
+        var data = {{ rData }}
+        var colgroup = ""
+        var colgroup = '<colgroup>  \
+                    <col span=1 >  \
+                    {% for keys1 in header|dictsort(reverse=true) %} 	\
+                        {% set ns.totalReleases = ns.totalReleases + 1 %} 	\
+                        {% set ns.platPerRelease = 0 %} \
+                            {% for keys2 in header[keys1[0]]|dictsort %}  		\
+                                {% set ns.platPerRelease = ns.platPerRelease +1  %}  \
+                            {% endfor %} \
+                        {% set ns.alias = "" %} \
+                        {% if keys1[0] == "9.0.4jS5" %}   \
+                            {% set ns.alias = "FPMR3" %}  \
+                        {% elif keys1[0] == "4.0.1e" %}   \
+                            {% set ns.alias = "HP"%} \
+                        {% elif keys1[0] == "4.0.2dS10" %}   \
+                            {% set ns.alias = "HPMR1" %} \
+                        {% elif keys1[0] == "4.0.3.98" %}  \
+                            {% set ns.alias = "HPMR3" %} \
+                        {% elif keys1[0] == "3.1.3i" %}   \
+                            {% set ns.alias = "GPMR2" %} \
+                        {% else %}   \
+                            {% set ns.alias = "unknown" %} \
+                        {% endif %} \
+                        <col  span={{ ns.platPerRelease }} >    \
+                    {% endfor %} \
+                </colgroup>'
+        var theadofhtml = '<tr> \
+                    <th colspan=1 style=text-align: right; ></th> \
+                    {% for keys1 in header|dictsort(reverse=true) %} 	\
+                        {% set ns.totalReleases = ns.totalReleases + 1 %} 	\
+                        {% set ns.platPerRelease = 0 %} \
+                        {% for keys2 in header[keys1[0]]|dictsort %}  \
+                            {% set ns.platPerRelease = ns.platPerRelease +1  %}  \
+                        {% endfor %} \
+                        {% set ns.alias = "" %} \
+                        {% if keys1[0] == "9.0.4jS5" %}   \
+                            {% set ns.alias = "FPMR3" %} \
+                        {% elif keys1[0] == "4.0.1e" %}  \
+                            {% set ns.alias = "HP"%} \
+                        {% elif keys1[0] == "4.0.2dS10" %}  \
+                            {% set ns.alias = "HPMR1" %} \
+                        {% elif keys1[0] == "4.0.3.98" %}  \
+                            {% set ns.alias = "HPMR3"%} \
+                        {% elif keys1[0] == "3.1.3i" %}   \
+                            {% set ns.alias = "GPMR2" %} \
+                        {% else %}   \
+                            {% set ns.alias = "unknown" %} \
+                        {% endif %} \
+                        <th colspan={{ ns.platPerRelease }}> {{ keys1[0] }} ({{ ns.alias}})   </th> \
+                    {% endfor %} \
+                </tr>'
+        var theadofhtml2 = '<tr> \
+                    <th>Component</th> \
+                        {% for keys1 in header|dictsort(reverse=true) %} 	\
+                            {% set ns.totalReleases = ns.totalReleases + 1 %} 	\
+                            {% set ns.platPerRelease = 0 %} 		\
+                            {% for keys2 in header[keys1[0]]|dictsort %} 			\
+                                {% set ns.platPerRelease = ns.platPerRelease +1  %} 	\
+                                {% set ns.total_cols = ns.total_cols +1  %} 		\
+                                <th>{{ keys2[0] }}</th>  	\
+                            {% endfor %} \
+                        {% endfor %} \
+                   </tr>'
+        var js_table_dummy_td = ' {% for keys1 in header|dictsort(reverse=true) %} \
+                            {% set ns.totalReleases = ns.totalReleases + 1 %} 	\
+                            {% set ns.platPerRelease = 1 %} 		\
+                                {% for keys2 in header[keys1[0]]|dictsort %} 	\
+                                    {% set ns.platPerRelease = ns.platPerRelease +1  %} \
+                                    {% set ns.total_cols = ns.total_cols +1  %} 	\
+                                    <td class="no-border-right no-border-left component_title" ></td> \
+                                {% endfor %} \
+                        {% endfor %} '
+        $(document).ready(function () {
+            nwComponents = {}
+            for (component in data) {
+                nwComponents[component] = {}
+                if (data[component]) {
+                    i = 1;
+                    //data[component]
+                    // //console.log("sorted :"+data[component].sort())
+                    for (release in data[component].sort()) {
+                        ////console.log(component+" release : "+data[component][release])
+                        if (data[component][release][1] in nwComponents[component]) {
+                            ////console.log(i+" Lets try ++"+data[component][release][1])
+                            //  nwComponents[component][data[component][release][1]+"_count"]=i;
+                            for (comp_applicable in data[component][release]) {
+                                if (comp_applicable > 3) {
+                                    ////console.log("comp_applicable "+data[component][release][comp_applicable])
+                                    if (data[component][release][comp_applicable] == "Y") {
+                                        //console.log("just testing")
+                                        nwComponents[component][data[component][release][1]][0][comp_applicable] = data[component][release][3]
+                                    }
+                                }
+                            }
+                            i++
+                            //break;
+                        } else {
+                            i = 1;
+                            //console.log("Lets try "+i+" "+data[component][release][1])
+                            // nwComponents[component][data[component][release][1]+"_count"]=i;
+                            nwComponents[component][data[component][release][1]] = []
+                            nwComponents[component][data[component][release][1]].push(data[component][release])
+                            for (comp_applicable in data[component][release]) {
+                                //console.log("comp_applicable "+data[component][release][comp_applicable])
+                                index = 3
+                                if (comp_applicable > 3) {
+                                    if (data[component][release][comp_applicable] == "Y") {
+                                        // //console.log("just testing 2")
+                                        //console.log( "just testing 2" +nwComponents[component][data[component][release][1]]+ " "+comp_applicable)
+                                        //console.log( "just testing 2" +nwComponents[component][data[component][release][1]][0])
+                                        //var index = items.indexOf(3452);
+                                        //if (index !== -1) {
+                                        //items[index] = 1010;
+                                        nwComponents[component][data[component][release][1]][0][comp_applicable] = data[component][release][3]
+                                        //}
+                                    }
+                                }
+                                index++;
+                            }
+                            //i++
+                            i = 2
                         }
-                 
-                        
                     }
                 }
-                
-             i++   
-                //break;
-            }else {
-                i=1;
-                //console.log("Lets try "+i+" "+data[component][release][1])
-               // nwComponents[component][data[component][release][1]+"_count"]=i;
-                nwComponents[component][data[component][release][1]] = []
-                nwComponents[component][data[component][release][1]].push(data[component][release])
-                for (comp_applicable in data[component][release]) {
-                 //console.log("comp_applicable "+data[component][release][comp_applicable])
-                 index=3
-                 if (comp_applicable > 3) {
-                        if (data[component][release][comp_applicable] == "Y") {
-                        
-                                
-                        
-                           
-                           // //console.log("just testing 2")
-                           //console.log( "just testing 2" +nwComponents[component][data[component][release][1]]+ " "+comp_applicable)
-                            //console.log( "just testing 2" +nwComponents[component][data[component][release][1]][0])
-                            //var index = items.indexOf(3452);
-
-                            //if (index !== -1) {
-                                //items[index] = 1010;
-                                 nwComponents[component][data[component][release][1]][0][comp_applicable]=data[component][release][3]
-                            //}
-                           
-                           
-                        
-                        } 
-                 
-                 }   
-                 index++;
-                }
-                //i++
-                i=2
             }
-            
-             
-            
-         }
-     }
- 
- }
- console.log("final components")
- console.log( JSON.stringify(nwComponents))
- 
- 
- js_table_html="<table id='example1' class= pageResize>"
- js_table_html+=colgroup
- js_table_html+="<thead>"
- js_table_html+=theadofhtml
- js_table_html+=theadofhtml2
-  js_table_html+="</thead>"
-// th_count=10;
- //js_table_dummy_td=''
- //for (th_c=0;th_c<th_count; th_c++ ){
- //js_table_dummy_td+="<td></td>"
- //}
- 
- /*for (th_c=0;th_c<=th_count; th_c++ ){
- 
-  
-  js_table_html+="<th>"+th_c+"</th>"
- }
- js_table_html+="</thead>"
- */
- js_table_html+="<tbody>"
-
- for (com in nwComponents){
-  js_table_html+="<tr>"
- js_table_html+="<td  class=component_title  >"+com+"</td>"+js_table_dummy_td
-    
-     js_table_html+="</tr>"
-   //console.log(JSON.stringify(nwComponents[com]))
-   
-
-    for (items in nwComponents[com]) {
-        js_table_html+="<tr>"
-        
-     
-    
-   
-        
-        for (item in nwComponents[com][items]) {
-            for (i in nwComponents[com][items][item]) {
-            
-            if (i==0){
-               
-                 
-                 
-              
-                        js_table_html+="<td >"+items+"   <span style=opacity:0;width:0px;height:0px;display: block;>"+com+"123</span></td>"
-                     }
-   
-                
-            
-                
-                if (i>3) {
-                    if (nwComponents[com][items][item][i] =="N"){
-                    js_table_html+="<td id=marker class=no>&times</td>"
-                    
+            //console.log("final components")
+            //console.log( JSON.stringify(nwComponents))
+            js_table_html = "<table id='example1' class= pageResize>"
+            js_table_html += colgroup
+            js_table_html += "<thead>"
+            js_table_html += theadofhtml
+            js_table_html += theadofhtml2
+            js_table_html += "</thead>"
+            // th_count=10;
+            //js_table_dummy_td=''
+            //for (th_c=0;th_c<th_count; th_c++ ){
+            //js_table_dummy_td+="<td></td>"
+            //}
+            /*for (th_c=0;th_c<=th_count; th_c++ ){
+             js_table_html+="<th>"+th_c+"</th>"
+            }
+            js_table_html+="</thead>"
+            */
+            js_table_html += "<tbody>"
+            for (com in nwComponents) {
+                js_table_html += "<tr>"
+                js_table_html += "<td  class=component_title  >" + com + "</td>" + js_table_dummy_td
+                js_table_html += "</tr>"
+                //console.log(JSON.stringify(nwComponents[com]))
+                for (items in nwComponents[com]) {
+                    js_table_html += "<tr>"
+                    for (item in nwComponents[com][items]) {
+                        for (i in nwComponents[com][items][item]) {
+                            if (i == 0) {
+                                js_table_html += "<td >" + items + "   <span style=opacity:0;width:0px;height:0px;display: block;>" + com + "</span></td>"
+                            }
+                            if (i > 3) {
+                                if (nwComponents[com][items][item][i] == "N") {
+                                    js_table_html += "<td id=marker class=no>&times</td>"
+                                } else {
+                                    js_table_html += "<td title='" + nwComponents[com][items][item][2] + "'  data-toggle='tooltip' >" + nwComponents[com][items][item][i] + " </td>"
+                                }
+                            }
+                        }
+                    }
+                    js_table_html += "</tr>"
+                }
+            }
+            js_table_html += "</tbody>"
+            js_table_html += "</table>"
+            //console.log(js_table_html)
+            $("#js_table").html(js_table_html)
+            function stripHtml(html) {
+                // Create a new div element
+                var temporalDivElement = document.createElement("div");
+                // Set the HTML content with the providen
+                temporalDivElement.innerHTML = html;
+                // Retrieve the text property of the element (cross-browser support)
+                return temporalDivElement.textContent || temporalDivElement.innerText || "";
+            }
+            function showdatatable() {
+                var table = $('#example1').DataTable({
+                    dom: 'Bfrtip',
+                    scrollY: "70vh",
+                    pageResize: true,
+                    scrollX: true,
+                    ScrollX: "100%",
+                    ScrollCollapse: true,
+                    ScrollXInner: "100%",
+                    paging: false,
+                    "ordering": false,
+                    fixedColumns: {
+                        leftColumns: 1
+                    },
+                    buttons: [
+                        'excel'
+                    ]
+                });
+                $("#example1_wrapper >div >button > span").text("Export to Excel")
+                var columns = table.columns().header();
+                //console.log(columns)
+                //console.log(typeof(columns))
+                columnsHtml = 'Toggle column: ';
+                var columns_names = []
+                i = 0;
+                for (k in columns) {
+                    //console.log(columns[k].innerText +"  "+ columns[k].cellIndex )
+                    if (typeof (columns[k].cellIndex) == 'number') {
+                        colno = columns[k].cellIndex.toString();
+                        //console.log(colno )
+                        //console.log(typeof(colno ))
+                        columnsHtml += '<a class="toggle-visa" data-column=' + colno + '>' + columns[k].innerText + '</a>'
+                        columns_names.push(columns[k].innerText)
+                        i++;
+                        //console.log(i )
+                        //console.log(columns.length )
+                        if (i != columns.length) {
+                            columnsHtml += ' - '
+                        }
+                        //console.log(columnsHtml )
+                    }
+                }
+                $("#colSelectionSpan").html(columnsHtml)
+                //console.log("unique(columns_names)" )
+                //console.log(unique(columns_names) )
+                columns_names_unique = unique(columns_names)
+                unique_columnsHtml = 'Toggle column: ';
+                for (colname in columns_names_unique) {
+                    if (columns_names_unique[colname] != 'Component') {
+                        unique_columnsHtml += '<button class="toggle-vis dt-button buttons-excel buttons-html5" type="button">' + columns_names_unique[colname] + '</button>'
+                    }
+                }
+                unique_columnsHtml += '<button class="toggle-vis dt-button buttons-excel buttons-html5" type="button">Hide ALL Platforms</button>'
+                // unique_columnsHtml+= '<button class="toggle-vis dt-button buttons-excel buttons-html5" type="button">Filter all unsupported component</button>'
+                $("#colSelectionSpan_unique").html(unique_columnsHtml)
+                function unique(list) {
+                    var result = [];
+                    $.each(list, function (i, e) {
+                        if ($.inArray(e, result) == -1) result.push(e);
+                    });
+                    return result;
+                }
+                notvalid_rows_count = 0;
+                notvalid_rows_arr = []
+                $('button.toggle-vis').on('click', function (e) {
+                    // e.preventDefault();
+                    console.log("click event")
+                    var that = this;
+                    var my = $(this);
+                    if ($(this).text() == "Hide ALL Platforms") {
+                        display_loading().done(function () {
+                            var inited = false;
+                            hide_all_platfrom(table).done(function () {
+                                removeTblStyle()
+                            })
+                        })
+                    } else if ($(this).text() == "Filter all unsupported component") {
+                        //var data = table.rows().data();
+                        var row_data = [];
+                        table.rows({ filter: 'applied' }).every(function (rowIdx, tableLoop, rowLoop) {
+                            var rowNode = this.node();
+                            //var row_data = this.cells(rowIdx, ':visible').data().toArray()
+                            //var row_data = this.data()
+                            var rowNode = this.node();
+                            row_data = []
+                            $(rowNode).find("td:visible").each(function () {
+                                row_data.push($(this).text());
+                                //do something with the cell data.
+                            });
+                            // console.log("row_data- "+ stripHtml(row_data))
+                            notvalid_rows = true;
+                            for (item in row_data) {
+                                if ((item > 0) && (row_data[item].trim().replace(/\s/g, '') != "&times")) {
+                                    //console.log(`item : ${item}  data : ${row_data[item]} 0 is ${row_data[0]}`)
+                                    notvalid_rows = false;
+                                    break;
+                                } else {
+                                    // console.log(`item2 part : ${item}  data : ${row_data[item]} 0 is ${row_data[0]}`)
+                                }
+                            }
+                            if (notvalid_rows) {
+                                var child = rowIdx;
+                                // console.log("row_data[0] : "+stripHtml(row_data[0]));
+                                notvalid_rows_arr.push(stripHtml(row_data[0]))
+                                // console.log(`child : ${child}`)
+                                // console.log(`this : ${this}`)
+                                // console.log("table.row(this).isShown()"+table.row(this))
+                                this.remove()
+                                notvalid_rows_count++;
+                            }
+                        })
+                        //$.LoadingOverlay("hide");
+                        $(".loadingoverlay").css({ "opacity": "0", "display": "none" })
                     } else {
-                      
-                            js_table_html+="<td title='"+nwComponents[com][items][item][2]+"'  data-toggle='tooltip' >"+nwComponents[com][items][item][i]+" </td>"
-                        
+                        // setTimeout(function() {
+                        $(".loadingoverlay").css({ "opacity": "1", "display": "flex" })
+                        $("#colSelectionSpan a").each(function (index) {
+                            if (index > 0) {
+                                if ($(this).text() == my.text()) {
+                                    //console.log( index + ": " + $( this ).text() );
+                                    var column = table.column(index)
+                                    column.visible(!column.visible());
+                                }
+                            }
+                            //table.columns.adjust().draw( false );
+                        });
+                        if ($(this).hasClass("hiddenCol")) {
+                            $(this).removeClass("hiddenCol")
+                            table.column($(this).text()).visible(true);
+                        } else {
+                            table.column($(this).text()).visible(false);
+                            $(this).addClass("hiddenCol")
+                        }
+                        //$.LoadingOverlay("hide");
+                        setTimeout(function () {
+                            $(".loadingoverlay").css({ "opacity": "0", "display": "none" })
+                        }, 500)
                     }
+                    //$.LoadingOverlay("hide");
+                    table.columns.adjust().draw(false);
+                    console.log(`Total Not valid rows ${notvalid_rows_count}`)
+                    console.log(`notvalid_rows_arr is ${notvalid_rows_arr}`)
+                });
+                ////console.log($(".dataTable ").attr("class"))
+                colspan_array = []
+                $(".dataTable  > thead > tr:first-child th").each(function () {
+                    //alert("hi")
+                    //console.log("colspan_array : "+$(this).attr("colspan"))
+                    colspan_array.push($(this).attr("colspan"))
+                })
+                //console.log(colspan_array)
+                k = 1;
+                colspan_start = 0;
+                colspan_end = 0
+                for (colspan in colspan_array) {
+                    colspan_int = parseInt(colspan)
+                    colspan_start += parseInt(colspan_array[colspan_int])
+                    colspan_int_plus = colspan_int + 1;
+                    colspan_end = colspan_start + parseInt(colspan_array[colspan_int_plus])
+                    //console.log("colspan_start is "+colspan_start)
+                    //console.log("colspan_end is "+colspan_end)
+                    //console.log("k is "+k)
+                    //console.log("k/2 is "+k%2)
+                    if (k % 2 != 0) {
+                        //console.log("colspan_array[colspan_int] is "+colspan_array[colspan_int])
+                        if (colspan_end) {
+                            for (var i = colspan_start; i < colspan_end; i++) {
+                                //console.log("range in i "+i)
+                                $(table.column(i).nodes()).addClass('highlight');
+                            }
+                        }
+                    }
+                    k++;
                 }
+                // $.LoadingOverlay("hide");
+                $(".loadingoverlay").css({ "opacity": "0", "display": "none" })
             }
-        }
-        
-        js_table_html+="</tr>"
-    
-    }
- 
- 
-   
-    
- }
- js_table_html+="</tbody>"
-js_table_html+="</table>"
-
-
-//console.log(js_table_html)
-$("#js_table").html(js_table_html)
-
-function stripHtml(html){
-    // Create a new div element
-    var temporalDivElement = document.createElement("div");
-    // Set the HTML content with the providen
-    temporalDivElement.innerHTML = html;
-    // Retrieve the text property of the element (cross-browser support)
-    return temporalDivElement.textContent || temporalDivElement.innerText || "";
-}
-
-
-function showdatatable() {     
-    var table = $('#example1').DataTable( {
-         dom: 'Bfrtip',
-        scrollY:        "70vh",
-        //scrollX:        true,
-        pageResize: true,
-        scrollX:        true,
-        ScrollX: "100%", 
-        ScrollCollapse: true,
-        ScrollXInner: "400%", 
-        paging:         false,
-        "ordering": false,
-
-        fixedColumns:   {
-            leftColumns: 1
-        },
-         buttons: [
-           'excel'
-        ]
-    } );
-    
-    $("#example1_wrapper >div >button > span").text("Export to Excel")
-    var columns = table.columns().header();
-     
-    
-    //console.log(columns)
-    //console.log(typeof(columns))
-
-    columnsHtml ='Toggle column: ';
-    var columns_names=[]
-    i=0;
-    for ( k in columns){
-        //console.log(columns[k].innerText +"  "+ columns[k].cellIndex )
-        if (typeof(columns[k].cellIndex) == 'number'){
-        colno = columns[k].cellIndex.toString();
-        //console.log(colno )
-        //console.log(typeof(colno ))
-        
-        columnsHtml += '<a class="toggle-visa" data-column='+colno+'>'+columns[k].innerText+'</a>'
-        columns_names.push(columns[k].innerText)
-        
-        i++;
-        
-        //console.log(i )
-        //console.log(columns.length )
-        if ( i != columns.length) {
-            columnsHtml += ' - '
-        }
-        //console.log(columnsHtml )
-         
-       }
-      
-    }
-    $("#colSelectionSpan").html(columnsHtml)
-    //console.log("unique(columns_names)" )
-    //console.log(unique(columns_names) )
-    columns_names_unique = unique(columns_names)
-    
-    unique_columnsHtml ='Toggle column: ';
-    for ( colname in columns_names_unique){
-        if (columns_names_unique[colname] != 'Component'){
-            unique_columnsHtml+= '<button class="toggle-vis dt-button buttons-excel buttons-html5" type="button">'+columns_names_unique[colname]+'</button>'
-        }
-    }
-     unique_columnsHtml+= '<button class="toggle-vis dt-button buttons-excel buttons-html5" type="button">Hide ALL Platforms</button>'
-     unique_columnsHtml+= '<button class="toggle-vis dt-button buttons-excel buttons-html5" type="button">Filter all unsupported component</button>'
-     $("#colSelectionSpan_unique").html(unique_columnsHtml)
-    
-    function unique(list) {
-    var result = [];
-    $.each(list, function(i, e) {
-        if ($.inArray(e, result) == -1) result.push(e);
-    });
-    return result;
-}
-
-
-   notvalid_rows_count=0; 
-   notvalid_rows_arr =[]
-     $('button.toggle-vis').on( 'click', function (e) {
-       // e.preventDefault();
-         var that = this;
-         var my = $(this);
-         
-         if ($( this ).text() == "Hide ALL Platforms"){
-         
-         console.log("Hide ALL")
-         
-          $( "#colSelectionSpan a" ).each(function( index ) {
-          
-         
-          if (index > 0 ) {
-            var column =  table.column(index)
-          //  console.log("column :"+column)
-            column.visible( false);
-            //dt.columns([index]).visible(false);
+            function hide_all_platfrom(table) {
+                var dfrd1 = $.Deferred();
+                console.log($("#colSelectionSpan a").length)
+                $("#colSelectionSpan a").each(function (index) {
+                    if (index > 0) {
+                        var column = table.column(index)
+                        //  console.log("column :"+column)
+                        column.visible(false);
+                        //column.visible( ! column.visible() );
+                        //dt.columns([index]).visible(false);
+                        console.log(index)
+                        dfrd1.resolve();
+                    }
+                }, 3000)
+                return $.when(dfrd1).done(function () {
+                    console.log('both tasks in function1 are done');
+                    // Both asyncs tasks are done
+                }).promise();
+                //removeTblStyle()
             }
-            })
-         
-         //console.log("Toggle ALL")
-        // dt.columns([1,2]).visible(false);
-         
-         } else if ($( this ).text() == "Filter all unsupported component"){
-         
-         //var data = table.rows().data();
-          var row_data = []; 
-          
-          
-         
-         
-         table.rows({filter: 'applied'}).every( function ( rowIdx, tableLoop, rowLoop) {
-         
-          var rowNode = this.node();
-         //var row_data = this.cells(rowIdx, ':visible').data().toArray()
-         //var row_data = this.data()
-          var rowNode = this.node();
-          row_data=[]
- 
-        $(rowNode).find("td:visible").each(function (){
- 
-                  row_data.push($(this).text());
-                  //do something with the cell data.
-    
-           });
-         
-         console.log("row_data- "+ stripHtml(row_data))
-          
-          notvalid_rows = true;
-         for (item in row_data){
-            if ((item > 0) && (row_data[item].trim().replace(/\s/g,'') != "X")) {
-                console.log(`item : ${item}  data : ${row_data[item]} 0 is ${row_data[0]}`)
-                notvalid_rows = false;
-                break;
-                } else {
-                    console.log(`item2 part : ${item}  data : ${row_data[item]} 0 is ${row_data[0]}`)
-                }
-         }
-        
-        if (notvalid_rows){
-             var child = rowIdx;
-            
-             console.log("row_data[0] : "+stripHtml(row_data[0]));
-             notvalid_rows_arr.push(stripHtml(row_data[0]))
-             console.log(`child : ${child}`)
-             console.log(`this : ${this}`)
-             console.log("table.row(this).isShown()"+table.row(this))
-             this.remove()
-             notvalid_rows_count++;
-        }
-  
-   })
-   
-  
-         
-         }else {
-        
-        $( "#colSelectionSpan a" ).each(function( index ) {
-        
-        
-  
-  if ($( this ).text() == my.text()){
-  //console.log( index + ": " + $( this ).text() );
-   var column =  table.column(index)
-    column.visible( ! column.visible() );
-  }
-  
-  //table.columns.adjust().draw( false ); 
-});
-
-
-
-  if ($(this).hasClass("hiddenCol")){
-        $(this).removeClass("hiddenCol")
-         table.column($(this).text()).visible(true);
-        }else {
-         table.column($(this).text()).visible(false);
-        $(this).addClass("hiddenCol")
-        }
-}
-        
-       
-table.columns.adjust().draw( false );         
-   
-        
-        console.log(`Total Not valid rows ${notvalid_rows_count}`)
-        console.log(`notvalid_rows_arr is ${notvalid_rows_arr}`)
-       
-       
-      
-        
- } );
- 
- ////console.log($(".dataTable ").attr("class"))
- colspan_array =[]
- 
- $(".dataTable  > thead > tr:first-child th").each(function() {
-   
-   //alert("hi")
-   
-   //console.log("colspan_array : "+$(this).attr("colspan"))
-   colspan_array.push ($(this).attr("colspan"))
-   
-   })
- 
- //console.log(colspan_array)
- k=1;
- colspan_start = 0;
- colspan_end=0
- for (colspan in colspan_array) {
- colspan_int = parseInt(colspan)
- colspan_start += parseInt(colspan_array[colspan_int])
- colspan_int_plus =colspan_int+1;
- colspan_end = colspan_start + parseInt(colspan_array[colspan_int_plus])
- //console.log("colspan_start is "+colspan_start)
- //console.log("colspan_end is "+colspan_end)
- //console.log("k is "+k)
- //console.log("k/2 is "+k%2)
- 
-    if (k%2!=0) {
-       
-         //console.log("colspan_array[colspan_int] is "+colspan_array[colspan_int])
-         if (colspan_end) {
-            for (var i=colspan_start; i<colspan_end; i++) {
-            //console.log("range in i "+i)
-            $( table.column( i ).nodes() ).addClass( 'highlight' );
+            function removeTblStyle() {
+                console.log("Hide ALL Platforms");
+                console.log($("#example1").innerHTML);
+                $("#example1").removeAttr("style");
+                console.log($("#example1").attr("class"));
+                $("#example1").css("width", "100%");
+                $(".loadingoverlay").css({ "opacity": "0", "display": "none" })
+                $(".dataTables_scrollHeadInner").css("width", "100%")
+                $(".dataTables_scrollHeadInner").children("table").css("width", "100%")
             }
-         }
-    }
-    k++;
- }
- 
- 
- }
-
- 
-    
-    
-   
-    
-
-    
-
-  
-    resizeTimer =  showdatatable(showdatatable, 2000);//
-   
-   
-   
-
-
-    
-    
-
-    
-    
-} );
-
-
-
-
-</script>
+            function display_loading() {
+                var dfrd2 = $.Deferred();
+                setTimeout(function () {
+                    $(".loadingoverlay").removeAttr("style")
+                    $(".loadingoverlay").css({ "opacity": "1", "display": "flex" })
+                    document.getElementById("loadingoverlay").style.width = "null"
+                    document.getElementById("loadingoverlay").style.display = "flex"
+                    mystyle = $(".loadingoverlay").attr("style").split(";")
+                    console.log(mystyle)
+                    console.log(mystyle[0])
+                    opacity_stl = mystyle[0].split(":")
+                    console.log("opacity_stl[1] : " + opacity_stl[1])
+                    console.log(typeof (opacity_stl[1]))
+                    console.log(typeof ($(".loadingoverlay").attr("style")))
+                    console.log($(".loadingoverlay").attr("style"))
+                    console.log($(".loadingoverlay").attr("style[opacity]"))
+                    if (opacity_stl[1].trim() == "1") {
+                        dfrd2.resolve();
+                    }
+                }, 1000);
+                return $.when(dfrd2).done(function () {
+                    console.log('both tasks in function1 are done');
+                    // Both asyncs tasks are done
+                }).promise();
+            }
+            resizeTimer = showdatatable(showdatatable, 600);//
+        });
+    </script>
 </body>
 </html>
