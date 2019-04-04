@@ -537,10 +537,6 @@
                 // $.LoadingOverlay("hide");
                 $(".loadingoverlay").css({ "opacity": "0", "display": "none" })
                 var headerLen = {{header}}
-                
-              
-                
-                        
               
                 var platformLength=0;        
                 console.log(`headerLen ${headerLen} ${Object.keys(headerLen).length}`)
@@ -552,41 +548,6 @@
                         console.log(`plKeys ${plKeys} `)
                         platformLength++;
                     }
-                    //$.LoadingOverlay("hide");
-                    table.columns.adjust().draw(false);
-                    console.log(`Total Not valid rows ${notvalid_rows_count}`)
-                    console.log(`notvalid_rows_arr is ${notvalid_rows_arr}`)
-                });
-                ////console.log($(".dataTable ").attr("class"))
-                colspan_array = []
-                $(".dataTable  > thead > tr:first-child th").each(function () {
-                    //alert("hi")
-                    //console.log("colspan_array : "+$(this).attr("colspan"))
-                    colspan_array.push($(this).attr("colspan"))
-                })
-                //console.log(colspan_array)
-                k = 1;
-                colspan_start = 0;
-                colspan_end = 0
-                for (colspan in colspan_array) {
-                    colspan_int = parseInt(colspan)
-                    colspan_start += parseInt(colspan_array[colspan_int])
-                    colspan_int_plus = colspan_int + 1;
-                    colspan_end = colspan_start + parseInt(colspan_array[colspan_int_plus])
-                    //console.log("colspan_start is "+colspan_start)
-                    //console.log("colspan_end is "+colspan_end)
-                    //console.log("k is "+k)
-                    //console.log("k/2 is "+k%2)
-                    if (k % 2 != 0) {
-                        //console.log("colspan_array[colspan_int] is "+colspan_array[colspan_int])
-                        if (colspan_end) {
-                            for (var i = colspan_start; i < colspan_end; i++) {
-                                //console.log("range in i "+i)
-                                $(table.column(i).nodes()).addClass('highlight');
-                            }
-                        }
-                    }
-                    k++;
                 }
                 console.log(`platformLength is ${platformLength}`)
                 if (platformLength <= 3 ) {
