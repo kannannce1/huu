@@ -331,7 +331,7 @@ def processParsedData(ctx):
 
 def generateHtmlCompatibleData(ctx):
 
-	totalColumns = 4
+	totalFixedCols = 3
 	totalRelease = 0
 	totalPlatforms = 0
 
@@ -343,10 +343,10 @@ def generateHtmlCompatibleData(ctx):
 		for platform in sorted(ctx.finalData[release].keys()):
 			totalPlatforms += 1
 
-	totalColumns = totalPlatforms + totalColumns
-	htmlRow = ['N'] * totalColumns
+	htmlRow = ['N'] *(totalPlatforms + totalFixedCols)
 	ii = 0
 
+	logging.info('ctx.table_rows: %s', ctx.table_rows)
 	for component in sorted(ctx.table_rows.keys()):
 		ctx.newHTML[component] = []
 		componentHTMLReport = []
@@ -356,9 +356,10 @@ def generateHtmlCompatibleData(ctx):
 				ii += 1
 				if component in ctx.finalData[release][platform].keys():
 					for row in ctx.table_rows[component]:
-
+						logging.debug('considering row: %s', row)
+						#if row[0] in list(map(lambda x: x[0] , ctx.finalData[release][platform][component])):
 						if row in ctx.finalData[release][platform][component]:
-							htmlRow = ['N'] * totalColumns
+							htmlRow = ['N'] *  ((totalPlatforms + totalFixedCols))
 
 							newL = len(row)
 							if newL > 3:
@@ -374,39 +375,34 @@ def generateHtmlCompatibleData(ctx):
 							else:
 								pass
 
-							i = 1
+							htmlRow[1] = row[0]
+							htmlRow[2] = row[1]
 
-							for elem in row:
-								htmlRow[i] = elem
-								i += 1
-								print('CHECKING ROW', row)
-							'''
-							check if 'row' is present in htmlReport
-							if present then mark it Y
-							if not present then add it and mark it Y
-							'''
 							indexInHtmlReport = 0
 							rowInHtmlPresent =  False
 							for rowHtml in componentHTMLReport:
-								irow = [row[0],row[2]]
-								irowHtml = [rowHtml[1],rowHtml[3]]
-								if irow == irowHtml:
-									rowInHtmlPresent = True
-									break
+								if row[0] == rowHtml[1]:
+									if row[1] == rowHtml[2]:
+										rowInHtmlPresent = True
+										break
+									else:
+										logging.warning("row description=%s doesn't match with existing report=%s", row[1], rowHtml[2])
+										rowInHtmlPresent = True
+										break
 								indexInHtmlReport += 1
 
 							if rowInHtmlPresent:
-								yy = componentHTMLReport[indexInHtmlReport][ii + 4]
+								yy = componentHTMLReport[indexInHtmlReport][ii + totalFixedCols]
 
 								if yy != row[2] and yy != 'N':
-									logging.debug('row present %s ',componentHTMLReport[indexInHtmlReport][ii + 4])
-									assert False, 'same key:value pair expected, exiting'
+									#assert False, 'same key:value pair expected, exiting'
+									logging.warning('possible assert row=%s, yy=%s rel=%s plat=%s ii=%s', row,yy,release,platform,ii)
 								else:
-									logging.debug('row present %s %s ',yy, componentHTMLReport[indexInHtmlReport][ii + 4])
-									componentHTMLReport[indexInHtmlReport][ii + 4] = row[2]
+									logging.debug('row present %s %s ',yy, componentHTMLReport[indexInHtmlReport][ii + totalFixedCols])
+									componentHTMLReport[indexInHtmlReport][ii + totalFixedCols] = row[2]
 							else:
-								logging.debug('row absent adding now %s ', row)
-								htmlRow[ii + 4] = row[2]
+								logging.debug('row absent adding now %s platform=%s,ii=%s', row,platform,ii)
+								htmlRow[ii + totalFixedCols] = row[2]
 								componentHTMLReport.append(htmlRow)
 
 		ctx.newHTML[component] = componentHTMLReport
