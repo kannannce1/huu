@@ -1,0 +1,94 @@
+
+ <!Doctype html>
+<html>
+  <head>
+     <script src="./assets/js/playerjs.js" defer ></script>
+	
+	
+
+	</script>
+    <title>AIR Tamil | https://www.radioindialive.com</title>
+    <style>
+    .controls{
+      width: 70px;
+      height: 70px;
+      margin: auto;
+    }
+      body{
+        background-image: url("./assets/images/air-tamil.png");
+        background-color: #cccccc;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center;
+        backdrop-filter: blur(20px);
+        overflow: hidden;
+      }
+    </style>
+    
+  </head>
+    <body>
+      <script>
+         function PlayerjsAsync(){
+             player = new Playerjs({id:"player"});
+             player.api("play","https://5k8q87azdy4v-hls-live.wmncdn.net/MAKKAL/271ddf829afeece44d8732757fba1a66.sdp/mono.m3u8");
+          }
+   </script>
+      
+      <div style= "opacity: 0;">
+        <div id="player"> </div>
+      </div>
+       <div id="main" style=" width: 100%; height: calc( 100vh - 60px ); margin:auto;">
+        <div id= "image" style= "width: 200px; border: solid 2px green; height: 200px; margin: auto; margin-top: 20px;">
+          <img src="./assets/images/air-tamil.png" style="width: -webkit-fill-available; height: -webkit-fill-available;" />
+          
+        </div>
+        
+        <div id="buttuns" style="display: flex;
+    width: 300px;
+    height: 120px;
+    margin: auto;
+    margin-top: 30px;">
+          <a href= "/bharati-radios/radio-player?id=40"  class="controls"> <img src= "./assets/images/previus.png"  class="controls" /></a>
+          <img id="play-btn" src= "./assets/images/play-fill.svg" onclick="player.api('toggle');"  class="controls" />
+          <a href= "/bharati-radios/radio-player?id=42"  class="controls"> <img src= "./assets/images/next.png" class="controls" /></a>
+        </div>
+         <h1 style="    text-align: center;
+    font-size: 22px;">
+         AIR Tamil         </h1>
+      </div>
+    </body>
+  
+  <script>
+  function PlayerjsEvents(event,id,data){
+             
+               if(event=="play"){
+                    document.getElementById("play-btn").src = "./assets/images/pause-fill.svg";
+                }
+               
+             if(event=="pause"){
+                    document.getElementById("play-btn").src = "./assets/images/play-fill.svg";
+                }
+             
+             if(event=="buffering"){
+                    document.getElementById("play-btn").src = "./assets/images/buffering.gif";                   
+                }
+             
+             if(event=="buffered"){
+                   document.getElementById("play-btn").src = "./assets/images/pause-fill.svg";
+                }
+                                   
+             if(event=="error"){
+                   document.getElementById("play-btn").src = "./assets/images/warning.png";
+                }
+             
+             if(event == "time"){
+            console.log(event,id,data);
+           }
+         }
+      
+  </script>
+</html>
+
+
+
+
